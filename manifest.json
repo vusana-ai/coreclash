@@ -1,6 +1,6 @@
 {
-  "name": "용사 키우기 — 클릭 훈련 RPG",
-  "short_name": "용사 키우기",
+  "name": "칼바람 — 리그 오브 레전드 스타일",
+  "short_name": "칼바람",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
