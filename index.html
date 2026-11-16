@@ -61,12 +61,6 @@
         </div>
 
         <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <div class="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-amber-500/15 border border-amber-500/40 text-amber-300 flex items-center gap-1 shadow-sm">
-            <span>🪙</span>
-            <span id="headerGoldDisplay">500</span>
-            <span>G</span>
-          </div>
-
           <button id="serverSaveGoldBtn" type="button" title="클릭하여 서버 로그인 및 데이터 영구 저장"
             class="group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
             <svg class="w-3.5 h-3.5 shrink-0 gold-bar-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,7 +81,7 @@
       <!-- 2단 -->
       <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
         <p id="syncStatusText" class="text-[11px] text-slate-400 truncate">
-          우측 상단 [로그인]을 눌러 전적과 골드를 영구 보관하세요
+          로그인 시 칼바람 대전 전적이 자동으로 기록됩니다
         </p>
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
           <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
@@ -159,7 +153,7 @@
               [카렌 - 칼든 기사] 선택 완료 · 출전 대기 중
             </div>
             <div class="text-[11px] text-slate-400 truncate">
-              양쪽 끝 넥서스 & 포탑 2개 + 포탈 2개에서 미니언 자동 생성 · Q/W/E/R & 점멸(F) 지원
+              넥서스에서 미니언 자동 생성 · 양쪽 수호 포탑 배치 · Q/W/E/R & 점멸(F) 지원
             </div>
           </div>
         </div>
@@ -1303,23 +1297,21 @@
 
       function initArenaEntities() {
         structures = [
-          // 블루팀 (왼쪽 끝 넥서스 + 2차 포탑 + 1차 포탑)
+          // 블루팀 (넥서스 + 쌍둥이 수호 포탑 2개 + 2차/1차 포탑)
           { id: 'blue_nexus', team: 'blue', type: 'nexus', name: '블루 넥서스', x: 105, y: 280, radius: 42, hp: 3000, maxHp: 3000, range: 0, atkCd: 0, atkTimer: 0, dmg: 0 },
+          { id: 'blue_s1', team: 'blue', type: 'turret', name: '블루 상단 수호 포탑', x: 160, y: 170, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
+          { id: 'blue_s2', team: 'blue', type: 'turret', name: '블루 하단 수호 포탑', x: 160, y: 390, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
           { id: 'blue_t2', team: 'blue', type: 'turret', name: '블루 2차 포탑', x: 255, y: 280, radius: 26, hp: 1800, maxHp: 1800, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 95 },
           { id: 'blue_t1', team: 'blue', type: 'turret', name: '블루 1차 포탑', x: 445, y: 280, radius: 26, hp: 1500, maxHp: 1500, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 85 },
-          // 레드팀 (오른쪽 끝 넥서스 + 2차 포탑 + 1차 포탑)
+          // 레드팀 (넥서스 + 쌍둥이 수호 포탑 2개 + 2차/1차 포탑)
           { id: 'red_nexus', team: 'red', type: 'nexus', name: '레드 넥서스', x: WORLD_W - 105, y: 280, radius: 42, hp: 3000, maxHp: 3000, range: 0, atkCd: 0, atkTimer: 0, dmg: 0 },
+          { id: 'red_s1', team: 'red', type: 'turret', name: '레드 상단 수호 포탑', x: WORLD_W - 160, y: 170, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
+          { id: 'red_s2', team: 'red', type: 'turret', name: '레드 하단 수호 포탑', x: WORLD_W - 160, y: 390, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
           { id: 'red_t2', team: 'red', type: 'turret', name: '레드 2차 포탑', x: WORLD_W - 255, y: 280, radius: 26, hp: 1800, maxHp: 1800, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 95 },
           { id: 'red_t1', team: 'red', type: 'turret', name: '레드 1차 포탑', x: WORLD_W - 445, y: 280, radius: 26, hp: 1500, maxHp: 1500, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 85 }
         ];
 
-        // 양쪽 미니언 생성 & 마법공학 차원문 포탈 2개씩
-        portals = [
-          { team: 'blue', x: 160, y: 170, radius: 24, destX: 390, destY: 200 },
-          { team: 'blue', x: 160, y: 390, radius: 24, destX: 390, destY: 360 },
-          { team: 'red', x: WORLD_W - 160, y: 170, radius: 24, destX: WORLD_W - 390, destY: 200 },
-          { team: 'red', x: WORLD_W - 160, y: 390, radius: 24, destX: WORLD_W - 390, destY: 360 }
-        ];
+        portals = [];
 
         // 다리 위 체력의 유물 2개
         relics = [
@@ -1344,27 +1336,30 @@
         document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount} (미니언 4 + 대장 1)`;
 
         ['blue', 'red'].forEach(team => {
-          const teamPortals = portals.filter(p => p.team === team);
-          teamPortals.forEach((pt, idx) => {
-            // 각 포탈에서 근접 1 + 원거리 1 = 총 4마리 생성
+          const nx = team === 'blue' ? 105 : WORLD_W - 105;
+          const ny = 280;
+          const dir = team === 'blue' ? 1 : -1;
+          // 넥서스에서 근접 2 + 원거리 2 + 대장 미니언 1 = 총 5마리 생성
+          [-38, 38].forEach(dy => {
             minions.push({
-              team, kind: 'melee', x: pt.x, y: pt.y + (idx === 0 ? -12 : 12),
+              team, kind: 'melee', x: nx + dir * 42, y: ny + dy,
               radius: 14, hp: 240 + waveCount * 18, maxHp: 240 + waveCount * 18,
-              ad: 18 + waveCount * 2, range: 38, speed: 78, atkCd: 1.0, atkTimer: 0, gold: 22
+              ad: 18 + waveCount * 2, range: 38, speed: 78, atkCd: 1.0, atkTimer: 0, gold: 50
             });
+          });
+          [-22, 22].forEach(dy => {
             minions.push({
-              team, kind: 'caster', x: pt.x + (team === 'blue' ? -22 : 22), y: pt.y,
+              team, kind: 'caster', x: nx + dir * 24, y: ny + dy,
               radius: 13, hp: 165 + waveCount * 14, maxHp: 165 + waveCount * 14,
-              ad: 24 + waveCount * 2, range: 145, speed: 76, atkCd: 1.15, atkTimer: 0, gold: 18
+              ad: 24 + waveCount * 2, range: 145, speed: 76, atkCd: 1.15, atkTimer: 0, gold: 50
             });
           });
-          // 5마리 중 1마리는 대장 미니언!
           minions.push({
-            team, kind: 'cannon', x: team === 'blue' ? 165 : WORLD_W - 165, y: 280,
+            team, kind: 'cannon', x: nx + dir * 50, y: ny,
             radius: 20, hp: 480 + waveCount * 32, maxHp: 480 + waveCount * 32,
-            ad: 40 + waveCount * 3, range: 165, speed: 74, atkCd: 1.2, atkTimer: 0, gold: 55
+            ad: 40 + waveCount * 3, range: 165, speed: 74, atkCd: 1.2, atkTimer: 0, gold: 70
           });
-          vfxList.push({ type: 'ring', x: team === 'blue' ? 160 : WORLD_W - 160, y: 280, r: 10, maxR: 55, color: team === 'blue' ? '#38bdf8' : '#f43f5e', life: 0.5 });
+          vfxList.push({ type: 'ring', x: nx, y: ny, r: 14, maxR: 64, color: team === 'blue' ? '#38bdf8' : '#f43f5e', life: 0.55 });
         });
       }
 
@@ -1527,6 +1522,10 @@
             killer.kills++;
             killer.gold += 300;
             gainXp(killer, 140);
+            if (killer === myHero) {
+              playSfx('gold');
+              floatingTexts.push({ x: target.x, y: target.y - 26, text: '+300G', color: '#fde047', life: 1.0 });
+            }
           } else {
             const opp = target === myHero ? enemyHero : myHero;
             if (opp) { opp.gold += 150; gainXp(opp, 80); }
@@ -1812,10 +1811,11 @@
         // 마나/체력 재생 & 넥서스 우물 회복
         h.mp = Math.min(h.maxMp, h.mp + 14 * dt);
         h.gold += (state.isVip && h === myHero ? 6 : 3) * dt;
-        const nearHome = (h.team === 'blue' && h.x < 185) || (h.team === 'red' && h.x > WORLD_W - 185);
-        if (nearHome) {
-          h.hp = Math.min(h.maxHp, h.hp + 95 * dt);
-          h.mp = Math.min(h.maxMp, h.mp + 45 * dt);
+        const ownNexus = structures.find(s => s.type === 'nexus' && s.team === h.team && s.hp > 0);
+        const onNexus = ownNexus && Math.hypot(h.x - ownNexus.x, h.y - ownNexus.y) <= ownNexus.radius + 36;
+        if (onNexus) {
+          h.hp = Math.min(h.maxHp, h.hp + Math.max(22, h.maxHp * 0.025) * dt);
+          h.mp = Math.min(h.maxMp, h.mp + 30 * dt);
         } else if (h.combatTimer <= 0 && (h.champId === 'karen' || h.warmogRegen)) {
           h.hp = Math.min(h.maxHp, h.hp + h.maxHp * (h.warmogRegen ? 0.04 : 0.02) * dt);
         }
@@ -2303,7 +2303,6 @@
         document.getElementById('hudMpBar').style.width = `${Math.max(0, (myHero.mp / myHero.maxMp) * 100)}%`;
         document.getElementById('hudGoldText').textContent = `🪙 ${Math.floor(myHero.gold)} G`;
         document.getElementById('hudStatsText').textContent = `공격 ${myHero.ad} · 이속 ${Math.round(myHero.speed)}`;
-        document.getElementById('headerGoldDisplay').textContent = Math.floor(myHero.gold);
 
         ['Q', 'W', 'E', 'R', 'D'].forEach(k => {
           const el = document.getElementById('cd' + k);
@@ -2587,6 +2586,22 @@
         } catch (e) {}
       }
 
+      function maskPrivacyInfo(value) {
+        if (value === null || value === undefined) return '익명';
+        let s = String(value).trim();
+        if (!s) return '익명';
+        s = s.replace(/(01\d|0\d{1,2})[-.\s]?([\d*]{3,4})[-.\s]?(\d{4})/g, (_, p1, p2, p3) => {
+          return `${p1}-${'*'.repeat(p2.length)}-${p3}`;
+        });
+        s = s.replace(/^([\d*]{4})[-.\s]?(\d{4})$/, (_, p1, p2) => `****-${p2}`);
+        return s;
+      }
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, ch => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[ch]));
+      }
+
       async function loadPvpRanking() {
         const listEl = document.getElementById('pvpRankingList');
         if (!listEl) return;
@@ -2598,7 +2613,7 @@
             if (arr.length > 0) {
               listEl.innerHTML = arr.map((r, i) => `
                 <div class="flex justify-between px-2.5 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
-                  <span>${i + 1}위 ${r.maskedName || r.username}</span>
+                  <span>${i + 1}위 ${escapeHtml(maskPrivacyInfo(r.maskedName || r.username || r.name || '익명'))}</span>
                   <span class="text-amber-300 font-extrabold">${r.score || 0}승</span>
                 </div>
               `).join('');
@@ -2612,15 +2627,15 @@
 
       function updateAuthUI() {
         const badge = document.getElementById('userBadge');
-        const lbl = document.getElementById('serverSaveBtnLabel');
+        const loginBtn = document.getElementById('serverSaveGoldBtn');
         const outBtn = document.getElementById('logoutBtn');
         if (authToken && currentUsername) {
-          badge.textContent = `📱 ${currentUsername}`;
-          lbl.textContent = '서버저장';
+          badge.textContent = `📱 ${maskPrivacyInfo(currentUsername)}`;
+          loginBtn.classList.add('hidden');
           outBtn.classList.remove('hidden');
         } else {
           badge.textContent = '👤 게스트';
-          lbl.textContent = '로그인';
+          loginBtn.classList.remove('hidden');
           outBtn.classList.add('hidden');
         }
         document.getElementById('vipHeaderBtnLabel').textContent = state.isVip ? 'VIP 적용중' : 'VIP';
