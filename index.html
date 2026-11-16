@@ -49,7 +49,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-wrap">
           <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400/25 to-blue-600/25 text-sky-300 font-extrabold text-sm border border-sky-400/40 shadow-inner shrink-0">❄️</span>
-          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 shrink-0">칼바람 아레나</h1>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 shrink-0">칼바람</h1>
           <span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0">
             👤 게스트
           </span>
@@ -536,6 +536,264 @@
       // ==========================================
       // 1. 챔피언 & 상점 아이템 & 서버/상태 정의
       // ==========================================
+      // 성기사(카렌) 고퀄리티 2D 캐릭터 일러스트 (SVG & Canvas 오프스크린 스프라이트)
+      const KAREN_PALADIN_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="kSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f1f5f9"/><stop offset="55%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></linearGradient>
+          <linearGradient id="kGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#92400e"/></linearGradient>
+          <linearGradient id="kCape" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#991b1b"/><stop offset="100%" stop-color="#450a0a"/></linearGradient>
+        </defs>
+        <!-- 진홍색 망토 -->
+        <path d="M22 30 L14 68 L66 68 L58 30 Z" fill="url(#kCape)" stroke="#f59e0b" stroke-width="1.5"/>
+        <!-- 성검 (오른손) -->
+        <g transform="translate(56,14) rotate(24)">
+          <rect x="-2.5" y="0" width="5" height="32" rx="1.5" fill="url(#kSteel)" stroke="#e2e8f0" stroke-width="0.8"/>
+          <rect x="-0.8" y="4" width="1.6" height="22" fill="#fef08a"/>
+          <rect x="-8" y="31" width="16" height="4" rx="1.5" fill="url(#kGold)"/>
+          <rect x="-2" y="35" width="4" height="8" fill="#451a03"/>
+        </g>
+        <!-- 몸통 갑주 & 황금 십자 -->
+        <path d="M27 32 L53 32 L50 58 L30 58 Z" fill="url(#kSteel)" stroke="#cbd5e1" stroke-width="1.4"/>
+        <rect x="38" y="35" width="4" height="17" fill="url(#kGold)"/>
+        <rect x="33" y="40" width="14" height="4" fill="url(#kGold)"/>
+        <!-- 3단 어깨 갑주 -->
+        <path d="M16 33 Q24 22 33 32 L28 42 L18 40 Z" fill="url(#kSteel)" stroke="url(#kGold)" stroke-width="1.8"/>
+        <path d="M64 33 Q56 22 47 32 L52 42 L62 40 Z" fill="url(#kSteel)" stroke="url(#kGold)" stroke-width="1.8"/>
+        <!-- 투구 & 붉은 깃털 & 빛나는 눈 -->
+        <path d="M38 6 L42 6 L44 16 L36 16 Z" fill="#991b1b"/>
+        <ellipse cx="40" cy="21" rx="11" ry="12" fill="url(#kSteel)" stroke="url(#kGold)" stroke-width="1.8"/>
+        <rect x="39" y="10" width="2" height="19" fill="url(#kGold)"/>
+        <rect x="32" y="19" width="16" height="3.2" rx="1" fill="#090a0f"/>
+        <circle cx="36" cy="20.6" r="1.3" fill="#fef08a"/>
+        <circle cx="44" cy="20.6" r="1.3" fill="#fef08a"/>
+        <!-- 자카룸 황금 십자 방패 (왼손) -->
+        <g transform="translate(15,34)">
+          <path d="M0 0 L20 0 L21 15 L10 29 L-1 15 Z" fill="url(#kCape)" stroke="url(#kGold)" stroke-width="2.4"/>
+          <rect x="8.5" y="3" width="3" height="20" fill="url(#kGold)"/>
+          <rect x="3" y="9" width="14" height="3" fill="url(#kGold)"/>
+          <circle cx="10" cy="10.5" r="2.3" fill="#38bdf8"/>
+        </g>
+      </svg>`;
+
+      const CASH_ARCHER_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cCloak" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+          <linearGradient id="cIce" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="50%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient>
+          <linearGradient id="cFur" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f8fafc"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient>
+        </defs>
+        <!-- 화살통 (등 뒤) -->
+        <g transform="translate(18,16) rotate(-22)">
+          <rect x="0" y="6" width="8" height="24" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
+          <polygon points="1,6 3,0 5,6" fill="#bae6fd"/><polygon points="4,6 6,1 8,6" fill="#38bdf8"/>
+        </g>
+        <!-- 서리 망토 -->
+        <path d="M22 30 L13 68 L61 68 L54 30 Z" fill="url(#cCloak)" stroke="#38bdf8" stroke-width="1.4"/>
+        <!-- 몸통 경갑 -->
+        <path d="M28 32 L50 32 L47 58 L31 58 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.4"/>
+        <path d="M39 34 L43 44 L39 52 L35 44 Z" fill="url(#cIce)"/>
+        <!-- 모피 어깨 망토 -->
+        <path d="M18 33 Q39 24 60 33 L56 40 Q39 34 22 40 Z" fill="url(#cFur)" stroke="#94a3b8" stroke-width="1"/>
+        <!-- 서리 후드 & 빛나는 눈 -->
+        <path d="M26 26 Q39 6 52 26 L50 34 Q39 31 28 34 Z" fill="url(#cCloak)" stroke="#7dd3fc" stroke-width="1.5"/>
+        <ellipse cx="39" cy="23" rx="8.5" ry="8.5" fill="#090d16"/>
+        <circle cx="35.5" cy="22.5" r="1.5" fill="#67e8f9"/>
+        <circle cx="42.5" cy="22.5" r="1.5" fill="#67e8f9"/>
+        <!-- 크리스탈 얼음 활 & 서리 화살 -->
+        <g transform="translate(49,12)">
+          <path d="M6 2 Q24 26 6 52" fill="none" stroke="url(#cIce)" stroke-width="3.6" stroke-linecap="round"/>
+          <line x1="6" y1="3" x2="6" y2="51" stroke="#e0f2fe" stroke-width="1"/>
+          <line x1="-8" y1="27" x2="22" y2="27" stroke="#bae6fd" stroke-width="2.2"/>
+          <polygon points="22,23 29,27 22,31" fill="#67e8f9" stroke="#ffffff" stroke-width="0.7"/>
+        </g>
+      </svg>`;
+
+      const KARIUS_TANK_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="tArmor" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#cbd5e1"/><stop offset="50%" stop-color="#64748b"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
+          <linearGradient id="tIce" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="60%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>
+        </defs>
+        <!-- 거대 빙하 전투 망치 (오른손) -->
+        <g transform="translate(56,12) rotate(18)">
+          <rect x="-2" y="14" width="4" height="36" fill="#334155" stroke="#94a3b8" stroke-width="0.8"/>
+          <rect x="-11" y="2" width="22" height="14" rx="2.5" fill="url(#tArmor)" stroke="#7dd3fc" stroke-width="1.6"/>
+          <polygon points="0,4 5,9 0,14 -5,9" fill="#38bdf8"/>
+        </g>
+        <!-- 거대 갑주 몸통 -->
+        <path d="M21 29 L59 29 L55 64 L25 64 Z" fill="url(#tArmor)" stroke="#94a3b8" stroke-width="1.6"/>
+        <polygon points="40,34 48,44 40,54 32,44" fill="url(#tIce)" stroke="#e0f2fe" stroke-width="1.2"/>
+        <!-- 거대 빙하 어깨 갑주 + 얼음 결정 -->
+        <path d="M10 34 Q20 16 33 30 L27 44 L13 42 Z" fill="url(#tArmor)" stroke="#7dd3fc" stroke-width="1.8"/>
+        <path d="M70 34 Q60 16 47 30 L53 44 L67 42 Z" fill="url(#tArmor)" stroke="#7dd3fc" stroke-width="1.8"/>
+        <polygon points="16,22 20,11 24,23" fill="url(#tIce)"/>
+        <polygon points="64,22 60,11 56,23" fill="url(#tIce)"/>
+        <!-- 뿔 달린 중장갑 투구 -->
+        <path d="M27 18 Q20 10 23 5 Q28 11 32 15 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="0.9"/>
+        <path d="M53 18 Q60 10 57 5 Q52 11 48 15 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="0.9"/>
+        <rect x="29" y="11" width="22" height="20" rx="7" fill="url(#tArmor)" stroke="#bae6fd" stroke-width="1.6"/>
+        <rect x="33" y="19" width="14" height="3.5" rx="1" fill="#020617"/>
+        <circle cx="36.5" cy="20.7" r="1.4" fill="#38bdf8"/>
+        <circle cx="43.5" cy="20.7" r="1.4" fill="#38bdf8"/>
+        <!-- 거대 빙하 타워 실드 (왼손) -->
+        <g transform="translate(10,31)">
+          <path d="M0 0 L24 0 L24 25 L12 37 L0 25 Z" fill="#1e3a5f" stroke="url(#tIce)" stroke-width="2.6"/>
+          <path d="M12 4 L19 16 L12 31 L5 16 Z" fill="url(#tIce)" opacity="0.85"/>
+        </g>
+      </svg>`;
+
+      const CHAMPION_SVGS = {
+        karen: KAREN_PALADIN_SVG,
+        cash: CASH_ARCHER_SVG,
+        karius: KARIUS_TANK_SVG
+      };
+
+      const champSprites = {};
+      Object.entries(CHAMPION_SVGS).forEach(([id, svg]) => {
+        const img = new Image();
+        champSprites[id] = { img, ready: false };
+        img.onload = () => { champSprites[id].ready = true; };
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      });
+
+      // 미니언(근접/원거리/대장), 포탈, 넥서스 전용 2D 일러스트 스프라이트
+      function makeMinionSvg(kind, team) {
+        const isBlue = team === 'blue';
+        const c1 = isBlue ? '#38bdf8' : '#fb7185';
+        const c2 = isBlue ? '#0369a1' : '#9f1239';
+        const c3 = isBlue ? '#bae6fd' : '#fecdd3';
+        if (kind === 'melee') {
+          return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 26 L44 26 L47 54 L17 54 Z" fill="${c2}" stroke="${c1}" stroke-width="2"/>
+            <circle cx="32" cy="20" r="11" fill="${c2}" stroke="${c1}" stroke-width="2"/>
+            <ellipse cx="32" cy="21" rx="7" ry="5" fill="#090d16"/>
+            <circle cx="29" cy="21" r="1.4" fill="${c3}"/><circle cx="35" cy="21" r="1.4" fill="${c3}"/>
+            <rect x="46" y="14" width="4" height="24" rx="1" fill="#e2e8f0" transform="rotate(18 48 26)"/>
+            <circle cx="17" cy="38" r="8" fill="#1e293b" stroke="${c1}" stroke-width="2"/>
+          </svg>`;
+        }
+        if (kind === 'caster') {
+          return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 28 L46 28 L50 56 L14 56 Z" fill="${c2}" stroke="${c1}" stroke-width="2"/>
+            <polygon points="32,4 45,25 19,25" fill="${c2}" stroke="${c1}" stroke-width="2" stroke-linejoin="round"/>
+            <ellipse cx="32" cy="24" rx="7" ry="4.5" fill="#090d16"/>
+            <circle cx="29.5" cy="24" r="1.4" fill="#fef08a"/><circle cx="34.5" cy="24" r="1.4" fill="#fef08a"/>
+            <line x1="50" y1="14" x2="50" y2="54" stroke="#92400e" stroke-width="3"/>
+            <circle cx="50" cy="12" r="5" fill="${c3}" stroke="${c1}" stroke-width="1.5"/>
+          </svg>`;
+        }
+        // 대장 미니언 (Captain / Siege)
+        return `<svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="24,14 28,4 36,11 44,4 48,14" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+          <path d="M16 28 L56 28 L52 62 L20 62 Z" fill="${c2}" stroke="#fbbf24" stroke-width="2.5"/>
+          <path d="M10 30 Q20 18 28 30 L24 40 L12 38 Z" fill="#334155" stroke="#fbbf24" stroke-width="2"/>
+          <path d="M62 30 Q52 18 44 30 L48 40 L60 38 Z" fill="#334155" stroke="#fbbf24" stroke-width="2"/>
+          <rect x="24" y="13" width="24" height="18" rx="6" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+          <rect x="28" y="20" width="16" height="3.5" fill="#020617"/>
+          <circle cx="32" cy="21.7" r="1.6" fill="#fde047"/><circle cx="40" cy="21.7" r="1.6" fill="#fde047"/>
+          <rect x="48" y="34" width="18" height="10" rx="3" fill="#475569" stroke="${c1}" stroke-width="2"/>
+          <circle cx="64" cy="39" r="3.5" fill="${c3}"/>
+        </svg>`;
+      }
+
+      function makePortalSvg(team) {
+        const isBlue = team === 'blue';
+        const c1 = isBlue ? '#38bdf8' : '#fb7185';
+        const c2 = isBlue ? '#0284c7' : '#be123c';
+        const c3 = isBlue ? '#e0f2fe' : '#ffe4e6';
+        return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="34" fill="none" stroke="#fbbf24" stroke-width="3" stroke-dasharray="10 5"/>
+          <circle cx="40" cy="40" r="28" fill="${c2}" fill-opacity="0.45" stroke="${c1}" stroke-width="3"/>
+          <circle cx="40" cy="40" r="19" fill="none" stroke="${c3}" stroke-width="2" stroke-dasharray="6 4"/>
+          <polygon points="40,16 56,40 40,64 24,40" fill="${c1}" fill-opacity="0.65" stroke="${c3}" stroke-width="1.5"/>
+          <circle cx="40" cy="40" r="7" fill="${c3}"/>
+        </svg>`;
+      }
+
+      function makeNexusSvg(team) {
+        const isBlue = team === 'blue';
+        const c1 = isBlue ? '#38bdf8' : '#f43f5e';
+        const c2 = isBlue ? '#0369a1' : '#881337';
+        const c3 = isBlue ? '#bae6fd' : '#fecdd3';
+        return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="#0f172a" stroke="#fbbf24" stroke-width="3"/>
+          <polygon points="50,14 80,32 80,68 50,86 20,68 20,32" fill="${c2}" stroke="${c1}" stroke-width="2.5"/>
+          <polygon points="50,22 68,50 50,78 32,50" fill="${c1}" stroke="${c3}" stroke-width="2"/>
+          <polygon points="50,34 60,50 50,66 40,50" fill="${c3}"/>
+          <circle cx="50" cy="14" r="3.5" fill="#fbbf24"/><circle cx="50" cy="86" r="3.5" fill="#fbbf24"/>
+          <circle cx="20" cy="50" r="3.5" fill="#fbbf24"/><circle cx="80" cy="50" r="3.5" fill="#fbbf24"/>
+        </svg>`;
+      }
+
+      function makeTurretSvg(team) {
+        const isBlue = team === 'blue';
+        const c1 = isBlue ? '#38bdf8' : '#fb7185';
+        const c2 = isBlue ? '#0284c7' : '#be123c';
+        const c3 = isBlue ? '#e0f2fe' : '#ffe4e6';
+        return `<svg viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="twStone_${team}" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#64748b"/>
+              <stop offset="45%" stop-color="#334155"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+            <linearGradient id="twGold_${team}" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fef08a"/>
+              <stop offset="50%" stop-color="#f59e0b"/>
+              <stop offset="100%" stop-color="#78350f"/>
+            </linearGradient>
+            <radialGradient id="twOrb_${team}" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="45%" stop-color="${c1}"/>
+              <stop offset="100%" stop-color="${c2}"/>
+            </radialGradient>
+          </defs>
+          <!-- 바닥 3D 그림자 -->
+          <ellipse cx="50" cy="106" rx="36" ry="11" fill="rgba(0,0,0,0.6)"/>
+          <!-- 3D 팔각 석조 받침대 -->
+          <polygon points="18,96 34,86 66,86 82,96 68,108 32,108" fill="url(#twStone_${team})" stroke="#94a3b8" stroke-width="1.5"/>
+          <polygon points="24,88 38,80 62,80 76,88 64,96 36,96" fill="#1e293b" stroke="url(#twGold_${team})" stroke-width="1.6"/>
+          <!-- 3D 명암 포탑 기둥 -->
+          <polygon points="35,38 65,38 71,86 29,86" fill="url(#twStone_${team})" stroke="#475569" stroke-width="1.5"/>
+          <rect x="44" y="42" width="12" height="40" rx="2" fill="#0f172a" stroke="${c1}" stroke-width="1.2"/>
+          <line x1="50" y1="45" x2="50" y2="79" stroke="${c1}" stroke-width="2" opacity="0.8"/>
+          <!-- 상단 황금 왕관 받침 -->
+          <polygon points="26,34 74,34 67,44 33,44" fill="url(#twGold_${team})" stroke="#fef08a" stroke-width="1.2"/>
+          <polygon points="29,26 36,34 24,34" fill="url(#twGold_${team})"/>
+          <polygon points="71,26 64,34 76,34" fill="url(#twGold_${team})"/>
+          <polygon points="50,22 57,34 43,34" fill="url(#twGold_${team})"/>
+          <!-- 공중 부양 에너지 크리스탈 오브 -->
+          <circle cx="50" cy="17" r="12" fill="url(#twOrb_${team})" stroke="${c3}" stroke-width="1.8"/>
+          <ellipse cx="46" cy="13" rx="3.5" ry="2" fill="#ffffff" opacity="0.8"/>
+        </svg>`;
+      }
+
+      const worldSprites = {};
+      ['blue', 'red'].forEach(team => {
+        ['melee', 'caster', 'cannon'].forEach(kind => {
+          const k = `${kind}_${team}`;
+          const img = new Image();
+          worldSprites[k] = { img, ready: false };
+          img.onload = () => { worldSprites[k].ready = true; };
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(makeMinionSvg(kind, team));
+        });
+        const pk = `portal_${team}`;
+        const pImg = new Image();
+        worldSprites[pk] = { img: pImg, ready: false };
+        pImg.onload = () => { worldSprites[pk].ready = true; };
+        pImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(makePortalSvg(team));
+
+        const nk = `nexus_${team}`;
+        const nImg = new Image();
+        worldSprites[nk] = { img: nImg, ready: false };
+        nImg.onload = () => { worldSprites[nk].ready = true; };
+        nImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(makeNexusSvg(team));
+
+        const tk = `turret_${team}`;
+        const tImg = new Image();
+        worldSprites[tk] = { img: tImg, ready: false };
+        tImg.onload = () => { worldSprites[tk].ready = true; };
+        tImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(makeTurretSvg(team));
+      });
+
       const CHAMPIONS = {
         karen: {
           id: 'karen', name: '카렌', title: '칼든 기사', role: '근접 전사', icon: '⚔️',
@@ -894,7 +1152,7 @@
             <div>
               <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2.5">
-                  <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl border shadow-inner" style="background:${ch.color}22; border-color:${ch.color}66">${ch.icon}</div>
+                  <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl border shadow-inner overflow-hidden shrink-0" style="background:${ch.color}22; border-color:${ch.color}66">${CHAMPION_SVGS[ch.id] || ch.icon}</div>
                   <div>
                     <div class="text-sm font-black text-white">${ch.name} <span class="text-xs font-bold text-sky-300">(${ch.title})</span></div>
                     <div class="text-[11px] font-bold text-slate-400">${ch.role} · 체력 ${ch.maxHp} · 공격 ${ch.ad}</div>
@@ -925,7 +1183,7 @@
             isSel ? 'bg-indigo-600/30 border-indigo-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-indigo-500/60'
           }`;
           pBtn.innerHTML = `
-            <span class="text-xl">${ch.icon}</span>
+            <span class="w-7 h-7 flex items-center justify-center text-xl shrink-0">${CHAMPION_SVGS[ch.id] || ch.icon}</span>
             <div class="min-w-0">
               <div class="text-xs font-black truncate">${ch.name}</div>
               <div class="text-[10px] text-slate-400 truncate">${ch.title}</div>
@@ -1039,7 +1297,7 @@
           combatTimer: 0, warmogRegen: false,
           flashTimer: 0, portalCd: 0, dashTimer: 0, dashVx: 0, dashVy: 0,
           cds: { Q: 0, W: 0, E: 0, R: 0, D: 0 },
-          inBush: false
+          inBush: false, revealTimer: 0
         };
       }
 
@@ -1083,30 +1341,28 @@
 
       function spawnMinionWave() {
         waveCount++;
-        const isCannon = waveCount % 2 === 0;
-        document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount}${isCannon ? ' (대포)' : ''}`;
+        document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount} (미니언 4 + 대장 1)`;
 
         ['blue', 'red'].forEach(team => {
           const teamPortals = portals.filter(p => p.team === team);
           teamPortals.forEach((pt, idx) => {
-            // 각 포탈에서 근접 1 + 원거리 1 생성
+            // 각 포탈에서 근접 1 + 원거리 1 = 총 4마리 생성
             minions.push({
               team, kind: 'melee', x: pt.x, y: pt.y + (idx === 0 ? -12 : 12),
-              radius: 13, hp: 240 + waveCount * 18, maxHp: 240 + waveCount * 18,
-              ad: 18 + waveCount * 2, range: 36, speed: 78, atkCd: 1.0, atkTimer: 0, gold: 22
+              radius: 14, hp: 240 + waveCount * 18, maxHp: 240 + waveCount * 18,
+              ad: 18 + waveCount * 2, range: 38, speed: 78, atkCd: 1.0, atkTimer: 0, gold: 22
             });
             minions.push({
               team, kind: 'caster', x: pt.x + (team === 'blue' ? -22 : 22), y: pt.y,
-              radius: 11, hp: 165 + waveCount * 14, maxHp: 165 + waveCount * 14,
+              radius: 13, hp: 165 + waveCount * 14, maxHp: 165 + waveCount * 14,
               ad: 24 + waveCount * 2, range: 145, speed: 76, atkCd: 1.15, atkTimer: 0, gold: 18
             });
-            if (isCannon && idx === 0) {
-              minions.push({
-                team, kind: 'cannon', x: pt.x, y: 280,
-                radius: 17, hp: 460 + waveCount * 30, maxHp: 460 + waveCount * 30,
-                ad: 38 + waveCount * 3, range: 165, speed: 72, atkCd: 1.25, atkTimer: 0, gold: 48
-              });
-            }
+          });
+          // 5마리 중 1마리는 대장 미니언!
+          minions.push({
+            team, kind: 'cannon', x: team === 'blue' ? 165 : WORLD_W - 165, y: 280,
+            radius: 20, hp: 480 + waveCount * 32, maxHp: 480 + waveCount * 32,
+            ad: 40 + waveCount * 3, range: 165, speed: 74, atkCd: 1.2, atkTimer: 0, gold: 55
           });
           vfxList.push({ type: 'ring', x: team === 'blue' ? 160 : WORLD_W - 160, y: 280, r: 10, maxR: 55, color: team === 'blue' ? '#38bdf8' : '#f43f5e', life: 0.5 });
         });
@@ -1156,7 +1412,7 @@
 
       function setupHudForHero(h) {
         const c = CHAMPIONS[h.champId];
-        document.getElementById('hudPortrait').textContent = c.icon;
+        const hpEl = document.getElementById('hudPortrait'); if (CHAMPION_SVGS[c.id]) hpEl.innerHTML = CHAMPION_SVGS[c.id]; else hpEl.textContent = c.icon;
         document.getElementById('hudChampName').textContent = `${c.name} (${c.title})`;
         ['Q', 'W', 'E', 'R'].forEach(k => {
           document.getElementById('icon' + k).textContent = c.skills[k].icon;
@@ -1309,7 +1565,8 @@
         [myHero, enemyHero].forEach(h => {
           if (h && h.team === oppTeam && !h.dead && h.hp > 0) {
             const d = Math.hypot(h.x - unit.x, h.y - unit.y);
-            if (d < bestDist) { bestDist = d; best = h; }
+            const isStealthed = h.inBush && h.revealTimer <= 0 && d > 95;
+            if (!isStealthed && d < bestDist) { bestDist = d; best = h; }
           }
         });
         // 3. 적 포탑/넥서스
@@ -1328,6 +1585,7 @@
         if (!target) return;
 
         hero.atkTimer = hero.qBuffTimer > 0 ? hero.atkCd * 0.78 : hero.atkCd;
+        if (hero.inBush) hero.revealTimer = 1.6;
         hero.facing = Math.atan2(target.y - hero.y, target.x - hero.x);
         if (hero === myHero) playSfx('atk');
 
@@ -1380,6 +1638,7 @@
         }
         hero.mp -= sk.mp;
         hero.cds[key] = sk.cd;
+        if (hero.inBush) hero.revealTimer = 1.6;
         if (hero === myHero) playSfx(key === 'R' ? 'ult' : 'skill');
 
         const ang = (aimX !== undefined && aimY !== undefined)
@@ -1548,6 +1807,7 @@
           if (h.dmgReduceTimer <= 0) { h.dmgReduce = h.champId === 'karius' ? 0.15 : 0; h.reflectDmg = false; }
         }
         if (h.combatTimer > 0) h.combatTimer -= dt;
+        if (h.revealTimer > 0) h.revealTimer = Math.max(0, h.revealTimer - dt);
 
         // 마나/체력 재생 & 넥서스 우물 회복
         h.mp = Math.min(h.maxMp, h.mp + 14 * dt);
@@ -1791,20 +2051,18 @@
 
         // 4. 양쪽 포탈 2개씩 (마법공학 차원문 / 미니언 생성 포탈)
         portals.forEach(p => {
-          const pulse = 1 + Math.sin(matchTime * 4) * 0.12;
-          const col = p.team === 'blue' ? '#38bdf8' : '#fb7185';
+          const pSp = worldSprites[`portal_${p.team}`];
+          const sz = p.radius * 2.5;
           ctx.save();
-          ctx.strokeStyle = col;
-          ctx.lineWidth = 3;
-          ctx.shadowColor = col; ctx.shadowBlur = 12;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * pulse, 0, Math.PI * 2); ctx.stroke();
-          ctx.fillStyle = p.team === 'blue' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(244, 63, 94, 0.25)';
-          ctx.fill();
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = '#f8fafc';
-          ctx.font = 'bold 10px "Noto Sans KR"';
-          ctx.textAlign = 'center';
-          ctx.fillText('🌀 포탈', p.x, p.y + 3);
+          ctx.translate(p.x, p.y);
+          ctx.rotate(matchTime * (p.team === 'blue' ? 0.9 : -0.9));
+          if (pSp && pSp.ready) {
+            ctx.drawImage(pSp.img, -sz / 2, -sz / 2, sz, sz);
+          } else {
+            ctx.strokeStyle = p.team === 'blue' ? '#38bdf8' : '#fb7185';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(0, 0, p.radius, 0, Math.PI * 2); ctx.stroke();
+          }
           ctx.restore();
         });
 
@@ -1846,27 +2104,29 @@
 
           ctx.save();
           ctx.shadowColor = col; ctx.shadowBlur = s.type === 'nexus' ? 22 : 12;
-          ctx.fillStyle = s.team === 'blue' ? '#0284c7' : '#be123c';
-          ctx.strokeStyle = col;
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          if (s.type === 'nexus') {
-            for (let k = 0; k < 6; k++) {
-              const a = (k * Math.PI) / 3 + matchTime * 0.4;
-              const px = s.x + Math.cos(a) * s.radius;
-              const py = s.y + Math.sin(a) * s.radius;
-              if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          const sSp = s.type === 'nexus' ? worldSprites[`nexus_${s.team}`] : worldSprites[`turret_${s.team}`];
+          if (sSp && sSp.ready) {
+            if (s.type === 'nexus') {
+              const nsz = s.radius * 2.35;
+              ctx.drawImage(sSp.img, s.x - nsz / 2, s.y - nsz / 2, nsz, nsz);
+            } else {
+              const tw = s.radius * 2.75;
+              const th = s.radius * 3.3;
+              ctx.drawImage(sSp.img, s.x - tw / 2, s.y - th * 0.62, tw, th);
             }
-            ctx.closePath();
           } else {
+            ctx.fillStyle = s.team === 'blue' ? '#0284c7' : '#be123c';
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
             ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🗼', s.x, s.y + 6);
           }
-          ctx.fill(); ctx.stroke();
-          ctx.shadowBlur = 0;
-          ctx.fillStyle = '#ffffff';
-          ctx.font = s.type === 'nexus' ? 'bold 18px sans-serif' : 'bold 14px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(s.type === 'nexus' ? '💎' : '🗼', s.x, s.y + 6);
           ctx.restore();
 
           // 구조물 체력바
@@ -1877,27 +2137,42 @@
           ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw * (s.hp / s.maxHp), 7);
         });
 
-        // 7. 미니언
+        // 7. 미니언 (근접/원거리/대장 미니언 이미지 적용)
         minions.forEach(m => {
           const col = m.team === 'blue' ? '#60a5fa' : '#fb7185';
-          ctx.fillStyle = col;
-          ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+          const mSp = worldSprites[`${m.kind}_${m.team}`];
+          if (mSp && mSp.ready) {
+            const sz = m.kind === 'cannon' ? 44 : 30;
+            ctx.save();
+            ctx.translate(m.x, m.y);
+            if (m.team === 'red') ctx.scale(-1, 1);
+            ctx.drawImage(mSp.img, -sz / 2, -sz / 2, sz, sz);
+            ctx.restore();
+          } else {
+            ctx.fillStyle = col;
+            ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+          }
           // 미니언 HP 바
-          const bw = m.radius * 2;
+          const bw = m.kind === 'cannon' ? 40 : 26;
           ctx.fillStyle = '#0f172a';
-          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 8, bw, 4);
-          ctx.fillStyle = col;
-          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 8, bw * (m.hp / m.maxHp), 4);
+          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 10, bw, 4.5);
+          ctx.fillStyle = m.kind === 'cannon' ? '#fbbf24' : col;
+          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 10, bw * (m.hp / m.maxHp), 4.5);
         });
 
         // 8. 챔피언 렌더링
         [myHero, enemyHero].forEach(h => {
           if (!h || h.dead) return;
+          // 상대방이 은신 부시 안에 있고 공격하지 않았으며 근접하지 않았다면 보이지 않음!
+          if (h !== myHero && h.inBush && h.revealTimer <= 0) {
+            const sameBushOrNear = myHero && !myHero.dead && Math.hypot(myHero.x - h.x, myHero.y - h.y) <= 95;
+            if (!sameBushOrNear) return;
+          }
           const c = CHAMPIONS[h.champId];
           const teamCol = h.team === 'blue' ? '#38bdf8' : '#f43f5e';
           ctx.save();
-          if (h.inBush) ctx.globalAlpha = 0.55;
+          if (h.inBush && h.revealTimer <= 0) ctx.globalAlpha = 0.50;
 
           // 이동 목적지 마커
           if (h === myHero && h.targetX !== null) {
@@ -1913,14 +2188,23 @@
           }
 
           ctx.shadowColor = teamCol; ctx.shadowBlur = 16;
-          ctx.fillStyle = h.team === 'blue' ? '#0369a1' : '#9f1239';
+          ctx.fillStyle = h.team === 'blue' ? 'rgba(3, 105, 161, 0.55)' : 'rgba(159, 18, 57, 0.55)';
           ctx.strokeStyle = teamCol; ctx.lineWidth = 3.5;
           ctx.beginPath(); ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
           ctx.shadowBlur = 0;
 
-          ctx.font = '20px sans-serif';
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText(c.icon, h.x, h.y + 1);
+          const sp = champSprites[h.champId];
+          if (sp && sp.ready) {
+            ctx.save();
+            ctx.translate(h.x, h.y - 2);
+            if (Math.cos(h.facing) < 0) ctx.scale(-1, 1);
+            ctx.drawImage(sp.img, -27, -27, 54, 54);
+            ctx.restore();
+          } else {
+            ctx.font = '20px sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(c.icon, h.x, h.y + 1);
+          }
 
           // 이름표 & 체력바
           ctx.fillStyle = '#f8fafc';
@@ -1936,6 +2220,10 @@
             ctx.fillStyle = '#fde047';
             ctx.font = 'bold 12px "Noto Sans KR"';
             ctx.fillText('⚡기절', h.x, h.y - h.radius - 34);
+          } else if (h === myHero && h.inBush) {
+            ctx.fillStyle = h.revealTimer > 0 ? '#fb7185' : '#6ee7b7';
+            ctx.font = 'bold 10px "Noto Sans KR"';
+            ctx.fillText(h.revealTimer > 0 ? '👁️ 공격 발각!' : '🌿 은신 중', h.x, h.y - h.radius - 34);
           }
           ctx.restore();
         });
