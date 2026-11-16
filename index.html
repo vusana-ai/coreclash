@@ -1,0 +1,2422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>칼바람 아레나 — 리그 오브 레전드 스타일 ARAM</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
+  <script src="https://js.tosspayments.com/v2/standard"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    canvas {
+      touch-action: none;
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+    ::-webkit-scrollbar-thumb { background: rgba(71, 85, 105, 0.7); border-radius: 9999px; }
+    @keyframes goldShine {
+      0%, 100% { filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.45)); }
+      50% { filter: drop-shadow(0 0 10px rgba(253, 224, 71, 0.85)); }
+    }
+    .gold-bar-glow { animation: goldShine 2.4s infinite ease-in-out; }
+    @keyframes vipPulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(168, 85, 247, 0.45); }
+      50% { box-shadow: 0 0 15px rgba(232, 121, 249, 0.8); }
+    }
+    .vip-btn-glow { animation: vipPulse 2.2s infinite ease-in-out; }
+    @keyframes frostGlow {
+      0%, 100% { box-shadow: 0 0 14px rgba(56, 189, 248, 0.25); }
+      50% { box-shadow: 0 0 24px rgba(56, 189, 248, 0.55); }
+    }
+    .frost-glow { animation: frostGlow 2.6s infinite ease-in-out; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+  <!-- Header (2단 깔끔 정렬 구조 - 참고 디자인 유지) -->
+  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/25">
+    <div class="max-w-5xl mx-auto flex flex-col gap-2">
+      <!-- 1단 -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0 flex-wrap">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400/25 to-blue-600/25 text-sky-300 font-extrabold text-sm border border-sky-400/40 shadow-inner shrink-0">❄️</span>
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 shrink-0">칼바람 아레나</h1>
+          <span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0">
+            👤 게스트
+          </span>
+          <button id="vipOpenBtn" type="button" title="VIP 전용 특전 보기 및 구매"
+            class="vip-btn-glow px-2.5 py-0.5 rounded-md text-[10px] sm:text-[11px] font-black bg-gradient-to-r from-fuchsia-600 via-purple-600 to-indigo-600 hover:from-fuchsia-500 hover:to-indigo-500 text-white border border-amber-300/80 transition active:scale-95 flex items-center gap-1 cursor-pointer shrink-0">
+            <span>👑</span>
+            <span id="vipHeaderBtnLabel">VIP</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div class="px-2.5 py-1 rounded-xl text-xs font-extrabold bg-amber-500/15 border border-amber-500/40 text-amber-300 flex items-center gap-1 shadow-sm">
+            <span>🪙</span>
+            <span id="headerGoldDisplay">500</span>
+            <span>G</span>
+          </div>
+
+          <button id="serverSaveGoldBtn" type="button" title="클릭하여 서버 로그인 및 데이터 영구 저장"
+            class="group px-2.5 sm:px-3 py-1 rounded-xl text-xs font-black bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600 hover:from-yellow-200 hover:via-amber-300 hover:to-amber-500 text-slate-950 border border-yellow-200/80 shadow-md shadow-amber-500/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+            <svg class="w-3.5 h-3.5 shrink-0 gold-bar-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.5 7.5L8.5 5H15.5L18.5 7.5L21 17.5H3L5.5 7.5Z" fill="#78350F" stroke="#451A03" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M8.5 5H15.5L17 9.5H7L8.5 5Z" fill="#FEF08A"/>
+              <path d="M7 9.5H17L19.2 16.5H4.8L7 9.5Z" fill="#F59E0B"/>
+              <path d="M8.8 6.2H15.2L16.1 8.6H7.9L8.8 6.2Z" fill="#FFFFFF" fill-opacity="0.55"/>
+            </svg>
+            <span id="serverSaveBtnLabel">로그인</span>
+          </button>
+
+          <button id="logoutBtn" type="button" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 transition active:scale-95 cursor-pointer">
+            로그아웃
+          </button>
+        </div>
+      </div>
+
+      <!-- 2단 -->
+      <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
+        <p id="syncStatusText" class="text-[11px] text-slate-400 truncate">
+          우측 상단 [로그인]을 눌러 전적과 골드를 영구 보관하세요
+        </p>
+        <div class="flex items-center gap-1.5 shrink-0 ml-auto">
+          <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
+            🎵 배경음 ON
+          </button>
+          <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
+            🔊 효과음 ON
+          </button>
+          <button id="resetOpenBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-rose-950/70 hover:text-rose-300 border border-slate-700 hover:border-rose-700/60 text-slate-300 transition active:scale-95 cursor-pointer">
+            초기화
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-3.5">
+
+    <!-- 상단 모드 선택 바 -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xl shadow-black/30 flex items-center justify-between gap-2 flex-wrap">
+      <div class="flex items-center gap-2">
+        <button id="modePracticeTab" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-sky-600 text-white shadow transition cursor-pointer">
+          ❄️ 연습 모드 (AI 칼바람)
+        </button>
+        <button id="modePvPTab" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer">
+          ⚔️ 대전 모드 (실시간 매칭)
+        </button>
+      </div>
+      <div class="flex items-center gap-2 text-xs font-bold">
+        <span class="text-slate-400">선택 챔피언:</span>
+        <span id="selectedChampBadge" class="px-2.5 py-0.5 rounded-lg bg-sky-500/15 border border-sky-400/40 text-sky-300">⚔️ 카렌 (칼든 기사)</span>
+        <span id="recordBadge" class="hidden sm:inline-block px-2 py-0.5 rounded-lg bg-slate-800 border border-slate-700 text-amber-300">0승 0패</span>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 화면 1-A: 연습 모드 챔피언 선택 & 대기 화면 -->
+    <!-- ========================================== -->
+    <section id="practiceSelectSection" class="bg-slate-900/95 border-2 border-sky-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-4">
+      <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <h2 class="text-base sm:text-lg font-black text-sky-300 flex items-center gap-2">
+            <span>🛡️</span>
+            <span>칼바람 나락 — 챔피언 선택</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">출전할 챔피언을 고른 뒤 대기 상태에서 [게임 시작]을 누르면 전장으로 입장합니다.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] font-bold text-slate-400">상대 AI:</span>
+          <select id="aiChampSelect" class="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1 text-xs font-bold text-rose-300 focus:outline-none focus:border-rose-400">
+            <option value="auto">🎲 자동 추천</option>
+            <option value="karen">⚔️ 카렌 (기사)</option>
+            <option value="cash">🏹 캐쉬 (궁수)</option>
+            <option value="karius">🛡️ 카리우스 (탱커)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 3종 챔피언 카드 그리드 -->
+      <div id="practiceChampGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
+
+      <!-- 선택 대기 상태바 & 게임 시작 버튼 -->
+      <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="practiceReadyDot" class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
+          <div class="min-w-0">
+            <div id="practiceWaitTitle" class="text-xs sm:text-sm font-black text-slate-100 truncate">
+              [카렌 - 칼든 기사] 선택 완료 · 출전 대기 중
+            </div>
+            <div class="text-[11px] text-slate-400 truncate">
+              양쪽 끝 넥서스 & 포탑 2개 + 포탈 2개에서 미니언 자동 생성 · Q/W/E/R & 점멸(F) 지원
+            </div>
+          </div>
+        </div>
+        <button id="practiceStartBtn" type="button"
+          class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-black text-sm shadow-lg shadow-sky-500/25 active:scale-95 transition cursor-pointer shrink-0">
+          ⚔️ 게임 시작하기
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 화면 1-B: 대전 모드 실시간 대기실 (대결매칭구조 참고) -->
+    <!-- ========================================== -->
+    <section id="pvpLobbySection" class="hidden bg-slate-900/95 border-2 border-blue-500/50 rounded-2xl p-4 shadow-2xl flex-col gap-3.5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2 flex-wrap">
+        <div>
+          <h2 class="text-sm sm:text-base font-extrabold text-blue-300 flex items-center gap-1.5">
+            <span>⚔️</span> <span>칼바람 나락 1:1 실시간 대전 대기실</span>
+          </h2>
+          <p class="text-[11px] text-slate-400 mt-0.5">챔피언을 고른 뒤 블루팀(왼쪽) 또는 레드팀(오른쪽) 자리에 참가하여 대기 후 시작하세요.</p>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span id="socketStatusBadge" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-slate-800 text-slate-400 border border-slate-700">연결 확인중</span>
+          <div class="text-xs font-bold px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-300 border border-blue-500/30" id="lobbyStatusBadge">
+            대기 중 (0/2)
+          </div>
+        </div>
+      </div>
+
+      <!-- 실시간 대기자 명단 -->
+      <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-extrabold text-sky-300">👥 실시간 대기자 명단</span>
+          <span id="waitingCountText" class="text-[10px] text-slate-400 font-bold">0명 대기중</span>
+        </div>
+        <div id="waitingListBox" class="flex flex-wrap gap-1.5 text-[11px]">
+          <span class="text-slate-500">대기실에 입장하면 내 아이디가 표시됩니다.</span>
+        </div>
+      </div>
+
+      <!-- 대전 모드 챔피언 선택 UI -->
+      <div class="bg-slate-950/90 border border-indigo-500/40 rounded-xl p-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-[11px] font-black text-indigo-300">🛡️ 대전 참가 전 내 챔피언 선택</span>
+          <span id="pvpSelectedChampLabel" class="text-[11px] font-bold text-amber-300">선택: 카렌 (칼든 기사)</span>
+        </div>
+        <div id="pvpChampSelectGrid" class="grid grid-cols-3 gap-2"></div>
+      </div>
+
+      <!-- 좌우 참가석 -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div id="slotLeft" class="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3.5 flex flex-col items-center justify-center gap-3 text-center">
+          <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-xl">🔵</div>
+          <div>
+            <div class="text-xs font-extrabold text-blue-300">[ 블루팀 (왼쪽 넥서스) ]</div>
+            <div id="leftPlayerName" class="text-sm font-black text-blue-400 mt-1">빈 자리 (입장 대기중)</div>
+          </div>
+          <div class="w-full flex items-center gap-1.5">
+            <button id="joinLeftBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow transition cursor-pointer">
+              블루팀 참가하기
+            </button>
+            <button id="cancelLeftBtn" type="button" class="hidden shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
+              대기취소
+            </button>
+          </div>
+        </div>
+
+        <div id="slotRight" class="bg-slate-950/80 border border-rose-500/30 rounded-xl p-3.5 flex flex-col items-center justify-center gap-3 text-center">
+          <div class="w-12 h-12 rounded-2xl bg-rose-600/20 border border-rose-500/40 flex items-center justify-center text-xl">🔴</div>
+          <div>
+            <div class="text-xs font-extrabold text-rose-300">[ 레드팀 (오른쪽 넥서스) ]</div>
+            <div id="rightPlayerName" class="text-sm font-black text-rose-400 mt-1">빈 자리 (입장 대기중)</div>
+          </div>
+          <div class="w-full flex items-center gap-1.5">
+            <button id="joinRightBtn" type="button" class="flex-1 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
+              레드팀 참가하기
+            </button>
+            <button id="cancelRightBtn" type="button" class="hidden shrink-0 px-3 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow transition cursor-pointer">
+              대기취소
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800 gap-2 flex-wrap">
+        <div class="text-[11px] text-slate-400" id="pvpNoticeText">챔피언을 선택한 뒤 블루팀/레드팀 자리에 참가하세요.</div>
+        <button id="pvpStartMatchBtn" type="button" disabled
+          class="px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700 font-black text-xs sm:text-sm transition cursor-not-allowed">
+          ⚔️ 대전 시작하기
+        </button>
+      </div>
+
+      <!-- 대전모드 랭킹 TOP 10 -->
+      <div class="pt-2 border-t border-slate-800">
+        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-extrabold text-amber-300">🏆 칼바람 대전모드 랭킹 TOP 10 <span class="text-[10px] font-semibold text-slate-400">(로그인 유저 전적 · 승 많은 순)</span></span>
+            <button id="pvpRankingRefreshBtn" type="button" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition cursor-pointer">
+              🔄 새로고침
+            </button>
+          </div>
+          <div id="pvpRankingList" class="flex flex-col gap-1 max-h-40 overflow-y-auto text-[11px]">
+            <div class="text-slate-500">랭킹 정보를 불러오는 중...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 화면 2: 칼바람 나락 인게임 전장 & LoL HUD -->
+    <!-- ========================================== -->
+    <section id="gameAreaSection" class="hidden flex-col gap-2.5">
+      <!-- 상단 스코어보드 & 미니맵 바 -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between gap-2 flex-wrap shadow-lg">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs font-black" id="hudBlueScore">🔵 0</span>
+          <span class="text-[11px] font-bold text-slate-400">VS</span>
+          <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-black" id="hudRedScore">0 🔴</span>
+          <span class="text-xs font-extrabold text-amber-300 tabular-nums ml-1" id="hudTimer">00:00</span>
+          <span class="hidden sm:inline-block text-[11px] text-slate-400 font-semibold" id="hudWaveInfo">웨이브 1</span>
+        </div>
+
+        <div class="flex items-center gap-2 text-[11px] font-bold">
+          <span class="text-sky-300" id="hudBlueNexus">블루 넥서스 3000</span>
+          <span class="text-slate-600">|</span>
+          <span class="text-rose-300" id="hudRedNexus">레드 넥서스 3000</span>
+          <button id="backToSelectBtn" type="button" class="ml-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold cursor-pointer">
+            ↩ 로비로
+          </button>
+        </div>
+      </div>
+
+      <!-- 메인 칼바람 나락 캔버스 -->
+      <div class="relative bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
+        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[2/1] min-h-[260px] max-h-[520px] bg-slate-950">
+          <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+          <!-- 3-2-1 카운트다운 -->
+          <div id="countdownOverlay" class="pointer-events-none absolute inset-0 z-20 hidden items-center justify-center bg-black/50">
+            <div id="countdownText" class="text-6xl sm:text-7xl font-black text-sky-300 drop-shadow-[0_4px_24px_rgba(56,189,248,0.85)]">3</div>
+          </div>
+
+          <!-- 사망 부활 대기 오버레이 -->
+          <div id="respawnOverlay" class="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center bg-slate-950/45">
+            <div class="bg-slate-900/90 border border-rose-500/60 rounded-2xl px-6 py-3 text-center shadow-2xl">
+              <div class="text-sm font-black text-rose-400">💀 챔피언 처치됨</div>
+              <div id="respawnTimerText" class="text-xl font-black text-white mt-0.5">부활까지 5초</div>
+            </div>
+          </div>
+
+          <!-- 넥서스 파괴 승리/패배 배너 -->
+          <div id="matchResultBanner" class="absolute inset-0 z-30 hidden items-center justify-center bg-black/75 backdrop-blur-sm">
+            <div class="bg-slate-900/95 border-2 border-amber-400 rounded-2xl px-8 py-6 text-center shadow-2xl max-w-sm w-[90%]">
+              <div id="matchWinnerTitle" class="text-2xl sm:text-3xl font-black text-amber-300">🏆 승리!</div>
+              <div id="matchResultSub" class="text-xs sm:text-sm font-bold text-slate-200 mt-1.5">적 넥서스를 파괴했습니다!</div>
+              <div class="mt-4 flex gap-2 justify-center">
+                <button id="rematchBtn" type="button" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-black cursor-pointer">🔄 다시하기</button>
+                <button id="resultLobbyBtn" type="button" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-black border border-slate-700 cursor-pointer">↩ 챔피언 선택</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 모바일 터치 가상 조이스틱 (캔버스 좌측 하단) -->
+          <div id="touchJoystickZone" class="sm:hidden absolute bottom-3 left-3 w-24 h-24 rounded-full bg-slate-900/50 border border-sky-400/35 backdrop-blur-sm z-10 flex items-center justify-center touch-none">
+            <div id="touchJoystickKnob" class="w-10 h-10 rounded-full bg-sky-400/60 border-2 border-white/70 shadow-lg pointer-events-none"></div>
+          </div>
+
+          <!-- 상점 팝업 (게임 내 B키 또는 상점 버튼) -->
+          <div id="shopOverlay" class="hidden absolute inset-0 z-20 items-center justify-center bg-black/70 backdrop-blur-sm p-3">
+            <div class="bg-slate-900 border-2 border-amber-500/50 rounded-2xl max-w-md w-full p-4 shadow-2xl">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🛒</span>
+                  <h3 class="text-sm font-black text-amber-300">칼바람 아이템 상점</h3>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-black text-amber-400" id="shopGoldText">500 G</span>
+                  <button id="shopCloseBtn" type="button" class="text-slate-400 hover:text-white text-sm font-bold px-2 py-0.5 rounded bg-slate-800 cursor-pointer">✕</button>
+                </div>
+              </div>
+              <div id="shopItemsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LoL 스타일 하단 챔피언 HUD (초상화 + 체력/마나 + Q/W/E/R/D/공격 + 상점) -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        <!-- 좌측: 내 챔피언 상태 -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="relative shrink-0">
+            <div id="hudPortrait" class="w-12 h-12 rounded-xl bg-slate-800 border-2 border-sky-400 flex items-center justify-center text-2xl shadow-inner">⚔️</div>
+            <span id="hudLevel" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border border-slate-900">1</span>
+          </div>
+          <div class="flex-1 min-w-0 sm:w-48">
+            <div class="flex items-center justify-between text-xs font-extrabold">
+              <span id="hudChampName" class="text-sky-300 truncate">카렌 (기사)</span>
+              <span id="hudKdaText" class="text-[11px] text-slate-300 tabular-nums">0/0 · CS 0</span>
+            </div>
+            <!-- HP Bar -->
+            <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
+              <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
+              <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white drop-shadow">1250 / 1250</span>
+            </div>
+            <!-- MP Bar -->
+            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
+              <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 중앙: Q / W / E / R + 기본공격(Space) + 점멸(D) 스킬바 -->
+        <div class="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
+          <button id="btnAtk" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-amber-400/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer">
+            <span class="text-base sm:text-lg">⚔️</span>
+            <span class="text-[9px] font-black text-amber-300">공격</span>
+            <span class="absolute top-0.5 left-1 text-[8px] font-bold text-slate-400">SPC</span>
+          </button>
+
+          <button id="btnQ" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+            <span id="iconQ" class="text-base sm:text-lg">🌀</span>
+            <span id="nameQ" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[90%]">회전베기</span>
+            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">Q</span>
+            <div id="cdQ" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+          </button>
+
+          <button id="btnW" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+            <span id="iconW" class="text-base sm:text-lg">🛡️</span>
+            <span id="nameW" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[90%]">결의</span>
+            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">W</span>
+            <div id="cdW" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+          </button>
+
+          <button id="btnE" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+            <span id="iconE" class="text-base sm:text-lg">💨</span>
+            <span id="nameE" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[90%]">돌진</span>
+            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">E</span>
+            <div id="cdE" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+          </button>
+
+          <button id="btnR" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-fuchsia-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+            <span id="iconR" class="text-base sm:text-lg">⚡</span>
+            <span id="nameR" class="text-[9px] font-extrabold text-fuchsia-200 truncate max-w-[90%]">궁극기</span>
+            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">R</span>
+            <div id="cdR" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+          </button>
+
+          <button id="btnD" type="button" class="relative w-11 h-12 sm:w-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-yellow-400/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+            <span class="text-base">✨</span>
+            <span class="text-[9px] font-extrabold text-yellow-200">점멸</span>
+            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">F</span>
+            <div id="cdD" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+          </button>
+        </div>
+
+        <!-- 우측: 골드 & 상점 -->
+        <div class="flex items-center justify-between md:justify-end gap-2 shrink-0">
+          <div class="text-right">
+            <div class="text-xs font-black text-amber-300" id="hudGoldText">🪙 500 G</div>
+            <div class="text-[10px] text-slate-400" id="hudStatsText">공격 72 · 속도 100%</div>
+          </div>
+          <button id="shopOpenBtn" type="button" class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow transition cursor-pointer">
+            🛒 상점 (B)
+          </button>
+        </div>
+      </div>
+
+      <div class="text-center text-[11px] text-slate-400">
+        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">방향키(↑↓←→) / 마우스 클릭 이동</kbd> · 기본공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
+      </div>
+    </section>
+
+    <!-- 바로가기 만들기 카드 (최하단 배치) -->
+    <section class="bg-gradient-to-br from-slate-900 to-sky-950/30 border border-sky-500/35 rounded-2xl p-3.5 shadow-xl shadow-black/40 mb-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-lg shrink-0">❄️</div>
+          <div class="text-sm font-black text-sky-300 truncate">칼바람 아레나 바로가기 만들기</div>
+        </div>
+        <button id="androidInstallBtn" type="button"
+          class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 active:scale-[0.98] text-white font-black text-xs sm:text-sm shadow-md transition shrink-0 cursor-pointer">
+          <span id="androidInstallBtnText">아이콘 만들기</span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toastBox" class="pointer-events-none fixed bottom-5 left-1/2 -translate-x-1/2 z-50 opacity-0 transition-all duration-200 translate-y-2">
+    <div id="toastMsg" class="px-4 py-2 rounded-xl bg-slate-900/95 border border-sky-500/50 text-xs sm:text-sm font-bold text-sky-200 shadow-2xl">
+      알림 메시지
+    </div>
+  </div>
+
+  <!-- VIP 모달 -->
+  <div id="vipModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+    <div class="bg-slate-900 border-2 border-purple-500/60 rounded-2xl max-w-lg w-full my-auto shadow-2xl overflow-hidden">
+      <div class="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 px-5 py-4 border-b border-purple-500/30 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <span class="w-9 h-9 rounded-xl bg-amber-400/20 border border-amber-400/50 flex items-center justify-center text-xl">👑</span>
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-amber-300">칼바람 VIP 영구 패키지</h2>
+            <p class="text-[11px] text-slate-300">시작 골드 +500G & 초당 골드 2배 & 왕실 오오라</p>
+          </div>
+        </div>
+        <button id="vipCloseBtn" type="button" class="text-slate-400 hover:text-white text-base font-bold px-2.5 py-1 rounded-lg hover:bg-slate-800 cursor-pointer">✕</button>
+      </div>
+      <div class="p-4 sm:p-5 flex flex-col gap-4">
+        <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 text-xs flex flex-col gap-2">
+          <div class="font-bold text-slate-200">✨ 매 판 시작 골드 1,000G 지급 (기본 500G)</div>
+          <div class="font-bold text-slate-200">⚡ 챔피언 공격력 +15% & 이동속도 +10% 상시 버프</div>
+          <div class="font-bold text-slate-200">👑 전용 황금 오오라 이펙트 적용</div>
+          <div class="pt-2 border-t border-slate-800 flex justify-between items-center">
+            <span class="text-slate-400 font-bold">결제 금액</span>
+            <span class="text-lg font-black text-amber-400">7,000원</span>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl overflow-hidden border border-slate-300">
+          <div id="tossWidgetLoading" class="py-6 text-center text-xs font-bold text-slate-500">결제창 불러오는 중...</div>
+          <div id="toss-payment-method"></div>
+          <div id="toss-agreement"></div>
+        </div>
+        <button id="vipPaySubmitBtn" type="button" disabled class="w-full py-3 rounded-xl bg-amber-400 disabled:bg-slate-700 disabled:text-slate-400 text-slate-950 font-black text-sm cursor-pointer">
+          💳 7,000원 결제하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 로그인 모달 -->
+  <div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-sky-500/40 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-base font-extrabold text-sky-300">🟨 서버 저장 계정</h2>
+        <button id="authCloseBtn" type="button" class="text-slate-400 hover:text-slate-200 text-sm font-bold px-2 py-1 cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">휴대폰 번호 뒷 8자리와 숫자 비밀번호 4자리로 전적을 서버에 저장하세요.</p>
+      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 mb-4">
+        <button id="modeLoginBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-sky-600 text-white cursor-pointer">기존 계정 로그인</button>
+        <button id="modeRegisterBtn" type="button" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold text-slate-400 cursor-pointer">간편 회원가입</button>
+      </div>
+      <form id="authForm" class="flex flex-col gap-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1">아이디 (휴대폰 번호 뒷 8자리)</label>
+          <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700 overflow-hidden">
+            <span class="px-3 py-2 bg-slate-900 text-sky-300 font-extrabold text-sm border-r border-slate-800">010 -</span>
+            <input id="authPhoneDigits" type="tel" inputmode="numeric" maxlength="9" required placeholder="1234-5678" class="w-full px-3 py-2 bg-transparent text-sm font-bold text-slate-100 focus:outline-none" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 mb-1">비밀번호 (숫자 4자리)</label>
+          <input id="authPinCode" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" required placeholder="1234" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm font-bold tracking-[0.35em] text-slate-100 focus:outline-none" />
+        </div>
+        <div id="authErrorMsg" class="hidden text-xs text-rose-400 font-semibold bg-rose-950/40 border border-rose-800/50 rounded-lg px-3 py-2"></div>
+        <button id="authSubmitBtn" type="submit" class="w-full py-2.5 rounded-xl text-xs sm:text-sm font-black bg-sky-600 hover:bg-sky-500 text-white shadow cursor-pointer">로그인 및 서버저장 연동</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 초기화 모달 -->
+  <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-5 shadow-2xl">
+      <h2 class="text-base font-extrabold text-slate-100 mb-1.5">게임 초기화</h2>
+      <p class="text-xs text-slate-400 mb-4">현재 진행 중인 칼바람 매치를 초기화하고 챔피언 선택 화면으로 돌아갈까요?</p>
+      <div class="flex justify-end gap-2">
+        <button id="resetCancelBtn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 cursor-pointer">취소</button>
+        <button id="resetConfirmBtn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-600 text-white cursor-pointer">초기화하기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // ==========================================
+      // 1. 챔피언 & 상점 아이템 & 서버/상태 정의
+      // ==========================================
+      const CHAMPIONS = {
+        karen: {
+          id: 'karen', name: '카렌', title: '칼든 기사', role: '근접 전사', icon: '⚔️',
+          color: '#38bdf8', accent: '#fbbf24',
+          maxHp: 1280, maxMp: 400, ad: 74, range: 72, speed: 225, atkCd: 0.72,
+          passiveDesc: '전투 비활성 시 초당 체력 +2% 급속 재생',
+          skills: {
+            Q: { name: '회전베기', icon: '🌀', cd: 5, mp: 45, desc: '주변 적에게 135 광역 피해 + 이속 증가' },
+            W: { name: '결의방패', icon: '🛡️', cd: 9, mp: 50, desc: '3초간 240 보호막 생성' },
+            E: { name: '돌진베기', icon: '💨', cd: 7, mp: 50, desc: '전방 돌진하며 115 피해 + 0.8초 둔화' },
+            R: { name: '정의의검', icon: '⚡', cd: 16, mp: 100, desc: '거대한 빛의 대검을 꽂아 280+잃은체력 피해' }
+          }
+        },
+        cash: {
+          id: 'cash', name: '캐쉬', title: '서리 궁수', role: '원거리 딜러', icon: '🏹',
+          color: '#22d3ee', accent: '#bae6fd',
+          maxHp: 940, maxMp: 450, ad: 58, range: 255, speed: 215, atkCd: 1.05,
+          passiveDesc: '평타 적중 시 적 1.5초 20% 서리 둔화',
+          skills: {
+            Q: { name: '집중사격', icon: '🎯', cd: 6, mp: 45, desc: '4초간 공속 +60% 및 이중 화살 발사' },
+            W: { name: '일제사격', icon: '❄️', cd: 5, mp: 55, desc: '전방 부채꼴 7발 서리 화살 발사 (각 95)' },
+            E: { name: '매의도약', icon: '🦅', cd: 8, mp: 40, desc: '빠르게 도약 회피 + 다음 평타 치명타' },
+            R: { name: '수정화살', icon: '☄️', cd: 15, mp: 100, desc: '장거리 초대형 얼음 화살 발사 (260 피해 + 1.8초 기절)' }
+          }
+        },
+        karius: {
+          id: 'karius', name: '카리우스', title: '빙하 탱커', role: '수호 탱커', icon: '🛡️',
+          color: '#60a5fa', accent: '#e2e8f0',
+          maxHp: 1680, maxMp: 420, ad: 56, range: 68, speed: 205, atkCd: 0.85,
+          passiveDesc: '최대 체력이 높아 받는 피해 15% 상시 감소',
+          skills: {
+            Q: { name: '방패돌격', icon: '🐏', cd: 6, mp: 45, desc: '방패로 돌진하여 110 피해 + 0.9초 기절' },
+            W: { name: '철벽수호', icon: '🧊', cd: 9, mp: 50, desc: '3.5초간 피해 45% 감소 + 반사' },
+            E: { name: '지진분쇄', icon: '💥', cd: 7, mp: 50, desc: '지면 강타 120 광역 피해 + 2초 둔화' },
+            R: { name: '불굴성채', icon: '🏰', cd: 17, mp: 100, desc: '거대화 + 주변 1.8초 기절(210 피해) + 체력 280 회복' }
+          }
+        }
+      };
+
+      const SHOP_ITEMS = [
+        { id: 'horn', name: '수호자의 뿔피리', cost: 450, icon: '📯', desc: '체력 +250 · 공격력 +12', hp: 250, ad: 12, spd: 0, aspd: 0 },
+        { id: 'boots', name: '광전사의 군화', cost: 500, icon: '🥾', desc: '이동속도 +35 · 공속 +18%', hp: 0, ad: 0, spd: 35, aspd: 0.18 },
+        { id: 'bf', name: 'B.F. 대검', cost: 750, icon: '🗡️', desc: '공격력 +32', hp: 0, ad: 32, spd: 0, aspd: 0 },
+        { id: 'sunfire', name: '태양불꽃 방패', cost: 850, icon: '🔥', desc: '체력 +420 · 공격력 +15', hp: 420, ad: 15, spd: 0, aspd: 0 },
+        { id: 'ie', name: '무한의 대검', cost: 1200, icon: '⚡', desc: '공격력 +58 · 공속 +15%', hp: 0, ad: 58, spd: 0, aspd: 0.15 },
+        { id: 'warmog', name: '워모그의 갑옷', cost: 1150, icon: '💚', desc: '체력 +700 · 초당 재생 대폭 증가', hp: 700, ad: 0, spd: 10, aspd: 0 }
+      ];
+
+      const GAME_ID = 'kalbaram_aram_v1';
+      const CLOUD_API_URL = 'https://02826k.duckdns.org';
+      const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
+      const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
+      const STORAGE_KEY = 'kalbaram_aram_save_v1';
+      const TOKEN_KEY = 'gongdaegong_jwt_token';
+      const USER_KEY = 'gongdaegong_username';
+
+      let authToken = null;
+      let currentUsername = null;
+      try {
+        authToken = localStorage.getItem(TOKEN_KEY) || null;
+        currentUsername = localStorage.getItem(USER_KEY) || null;
+      } catch (e) {}
+
+      let state = {
+        wins: 0,
+        losses: 0,
+        selectedChamp: 'karen',
+        soundEnabled: true,
+        bgmEnabled: true,
+        isVip: false
+      };
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const p = JSON.parse(raw);
+          if (p && typeof p === 'object') {
+            state = { ...state, ...p };
+            if (!CHAMPIONS[state.selectedChamp]) state.selectedChamp = 'karen';
+          }
+        }
+      } catch (e) {}
+
+      function saveState(sync = false) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+        if (sync && authToken) syncSaveToServer(false);
+      }
+
+      // ==========================================
+      // 2. Web Audio 합성 BGM & 효과음
+      // ==========================================
+      let audioCtx = null;
+      let bgmTimer = null;
+      let bgmStep = 0;
+
+      function getAudioContext() {
+        if (!state.soundEnabled && !state.bgmEnabled) return null;
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        return audioCtx;
+      }
+
+      function playSfx(type) {
+        if (!state.soundEnabled) return;
+        const ctxA = getAudioContext();
+        if (!ctxA) return;
+        const now = ctxA.currentTime;
+        const osc = ctxA.createOscillator();
+        const gain = ctxA.createGain();
+        if (type === 'atk') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.09);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(now); osc.stop(now + 0.1);
+        } else if (type === 'skill') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(160, now + 0.18);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(now); osc.stop(now + 0.2);
+        } else if (type === 'ult') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, now);
+          osc.frequency.exponentialRampToValueAtTime(520, now + 0.22);
+          osc.frequency.exponentialRampToValueAtTime(95, now + 0.42);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(now); osc.stop(now + 0.45);
+        } else if (type === 'gold') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(784, now);
+          osc.frequency.setValueAtTime(1046, now + 0.06);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain); gain.connect(ctxA.destination);
+          osc.start(now); osc.stop(now + 0.19);
+        }
+      }
+
+      function startBGM() {
+        stopBGM();
+        if (!state.bgmEnabled) return;
+        const ctxA = getAudioContext();
+        if (!ctxA) return;
+        const notes = [220, 261.63, 293.66, 329.63, 392, 329.63, 293.66, 261.63];
+        bgmTimer = setInterval(() => {
+          if (!state.bgmEnabled || !audioCtx) return;
+          try {
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(notes[bgmStep % notes.length], now);
+            g.gain.setValueAtTime(0.035, now);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
+            osc.connect(g); g.connect(audioCtx.destination);
+            osc.start(now); osc.stop(now + 0.35);
+            bgmStep++;
+          } catch (e) {}
+        }, 360);
+      }
+
+      function stopBGM() {
+        if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+      }
+
+      // ==========================================
+      // 3. Socket.io PvP 실시간 매칭 (대결매칭구조 참고)
+      // ==========================================
+      let socket = { emit: () => {}, on: () => {}, connected: false, id: 'local_' + Math.floor(Math.random() * 9999) };
+      let currentMode = 'practice'; // 'practice' | 'pvp'
+      let myGuestName = '소환사_' + Math.floor(Math.random() * 900 + 100);
+      let lastLobbyPlayers = [];
+      let pvpRoomName = null;
+      let pvpRole = null; // 'left' | 'right'
+      let pvpLeftChamp = 'karen';
+      let pvpRightChamp = 'cash';
+      let pvpLeftName = '블루팀';
+      let pvpRightName = '레드팀';
+
+      function getDisplayName() {
+        if (currentUsername) {
+          const parts = currentUsername.split('-');
+          return `번호(${parts[parts.length - 1] || '0000'})`;
+        }
+        return myGuestName;
+      }
+
+      function renderWaitingList(list) {
+        const box = document.getElementById('waitingListBox');
+        const cnt = document.getElementById('waitingCountText');
+        const arr = Array.isArray(list) ? list : [];
+        cnt.textContent = arr.length + '명 대기중';
+        if (arr.length === 0) {
+          box.innerHTML = '<span class="text-slate-500">현재 대기 중인 유저가 없습니다.</span>';
+          return;
+        }
+        box.innerHTML = '';
+        arr.forEach(p => {
+          const name = typeof p === 'string' ? p : (p.username || '게스트');
+          const isMe = (p.socketId && socket.id && p.socketId === socket.id) || name === getDisplayName();
+          const slotTag = p.slot === 'left' ? ' 🔵블루' : p.slot === 'right' ? ' 🔴레드' : ' ⏳대기';
+          const chip = document.createElement('span');
+          chip.className = 'px-2.5 py-1 rounded-lg border font-bold ' + (isMe ? 'bg-blue-500/20 border-blue-400 text-blue-200' : 'bg-slate-900 border-slate-700 text-slate-300');
+          chip.textContent = name + (isMe ? ' (나)' : '') + slotTag;
+          box.appendChild(chip);
+        });
+      }
+
+      function renderLobbySlots(players) {
+        lastLobbyPlayers = Array.isArray(players) ? players : [];
+        const leftP = lastLobbyPlayers.find(p => p.slot === 'left');
+        const rightP = lastLobbyPlayers.find(p => p.slot === 'right');
+        const count = lastLobbyPlayers.length;
+        document.getElementById('lobbyStatusBadge').textContent = `대기 중 (${count}/2)`;
+
+        const leftNameEl = document.getElementById('leftPlayerName');
+        const rightNameEl = document.getElementById('rightPlayerName');
+        const joinLeftBtn = document.getElementById('joinLeftBtn');
+        const joinRightBtn = document.getElementById('joinRightBtn');
+        const cancelLeftBtn = document.getElementById('cancelLeftBtn');
+        const cancelRightBtn = document.getElementById('cancelRightBtn');
+
+        if (leftP) {
+          const isMeL = leftP.socketId === socket.id;
+          const cName = CHAMPIONS[leftP.skinId]?.name || CHAMPIONS[state.selectedChamp].name;
+          leftNameEl.textContent = `${leftP.username} [${cName}] · 참가 대기중`;
+          if (isMeL) {
+            joinLeftBtn.textContent = `⏳ 대기중 (${cName})`;
+            joinLeftBtn.disabled = true;
+            joinLeftBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-amber-500/20 border border-amber-400 text-amber-200 cursor-default';
+            cancelLeftBtn.classList.remove('hidden');
+          } else {
+            joinLeftBtn.textContent = '다른 유저 선점됨';
+            joinLeftBtn.disabled = true;
+            joinLeftBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-400 cursor-not-allowed';
+            cancelLeftBtn.classList.add('hidden');
+          }
+        } else {
+          leftNameEl.textContent = '빈 자리 (입장 대기중)';
+          joinLeftBtn.textContent = '블루팀 참가하기';
+          joinLeftBtn.disabled = false;
+          joinLeftBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow cursor-pointer';
+          cancelLeftBtn.classList.add('hidden');
+        }
+
+        if (rightP) {
+          const isMeR = rightP.socketId === socket.id;
+          const cName = CHAMPIONS[rightP.skinId]?.name || CHAMPIONS[state.selectedChamp].name;
+          rightNameEl.textContent = `${rightP.username} [${cName}] · 참가 대기중`;
+          if (isMeR) {
+            joinRightBtn.textContent = `⏳ 대기중 (${cName})`;
+            joinRightBtn.disabled = true;
+            joinRightBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-amber-500/20 border border-amber-400 text-amber-200 cursor-default';
+            cancelRightBtn.classList.remove('hidden');
+          } else {
+            joinRightBtn.textContent = '다른 유저 선점됨';
+            joinRightBtn.disabled = true;
+            joinRightBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-400 cursor-not-allowed';
+            cancelRightBtn.classList.add('hidden');
+          }
+        } else {
+          rightNameEl.textContent = '빈 자리 (입장 대기중)';
+          joinRightBtn.textContent = '레드팀 참가하기';
+          joinRightBtn.disabled = false;
+          joinRightBtn.className = 'flex-1 py-2 rounded-xl text-xs font-extrabold bg-rose-600 hover:bg-rose-500 text-white shadow cursor-pointer';
+          cancelRightBtn.classList.add('hidden');
+        }
+
+        const startBtn = document.getElementById('pvpStartMatchBtn');
+        if (count === 2) {
+          startBtn.disabled = false;
+          startBtn.className = 'px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition cursor-pointer animate-bounce';
+          document.getElementById('pvpNoticeText').textContent = '✨ 양 팀이 모두 준비되었습니다! [대전 시작하기]를 누르세요.';
+        } else {
+          startBtn.disabled = true;
+          startBtn.className = 'px-5 py-2.5 rounded-xl bg-slate-800 text-slate-500 border border-slate-700 font-black text-xs sm:text-sm cursor-not-allowed';
+          document.getElementById('pvpNoticeText').textContent = '양쪽 참가자가 모두 입장해야 시작할 수 있습니다.';
+        }
+      }
+
+      function initSocket() {
+        const badge = document.getElementById('socketStatusBadge');
+        try {
+          if (typeof io !== 'undefined') {
+            socket = io(CLOUD_API_URL, { transports: ['websocket', 'polling'] });
+            socket.on('connect', () => {
+              badge.textContent = '🟢 실시간 연결됨';
+              badge.className = 'text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/40';
+              if (currentMode === 'pvp') socket.emit('enter_pvp_lobby', { username: getDisplayName() });
+            });
+            socket.on('disconnect', () => {
+              badge.textContent = '🔴 연결 끊김';
+              badge.className = 'text-[10px] font-bold px-2 py-1 rounded-lg bg-rose-500/15 text-rose-300 border border-rose-500/40';
+            });
+            socket.on('update_waiting_list', (list) => renderWaitingList(list));
+            socket.on('update_lobby', (players) => { renderWaitingList(players); renderLobbySlots(players); });
+            socket.on('lobby_error', (msg) => showToast(msg));
+            socket.on('match_started', (data) => {
+              pvpRoomName = data.room;
+              pvpRole = (data.leftPlayer.socketId === socket.id) ? 'left' : 'right';
+              pvpLeftChamp = CHAMPIONS[data.leftPlayer.skinId] ? data.leftPlayer.skinId : 'karen';
+              pvpRightChamp = CHAMPIONS[data.rightPlayer.skinId] ? data.rightPlayer.skinId : 'cash';
+              pvpLeftName = data.leftPlayer.username || '블루팀';
+              pvpRightName = data.rightPlayer.username || '레드팀';
+              startAramMatch('pvp');
+            });
+            socket.on('update_game_state', (data) => {
+              if (!data || data.room !== pvpRoomName || data.role === pvpRole) return;
+              if (data.hostState && pvpRole === 'right') {
+                applyHostSnapshot(data);
+              } else if (data.clientInput && pvpRole === 'left' && enemyHero) {
+                enemyHero.targetX = data.tx;
+                enemyHero.targetY = data.ty;
+                if (data.castSkill) castHeroSkill(enemyHero, data.castSkill, data.aimX, data.aimY);
+                if (data.doAtk) performHeroAttack(enemyHero);
+              }
+            });
+            socket.on('pvp_opponent_forfeit', () => endAramMatch(pvpRole === 'left' ? 'blue' : 'red', '상대방이 기권하여 승리했습니다!'));
+            socket.on('opponent_disconnected', () => endAramMatch(pvpRole === 'left' ? 'blue' : 'red', '상대방 연결이 종료되어 승리했습니다!'));
+          } else {
+            badge.textContent = '⚠️ 오프라인';
+          }
+        } catch (e) {
+          badge.textContent = '⚠️ 오프라인';
+        }
+      }
+
+      // ==========================================
+      // 4. 챔피언 선택 화면 렌더링
+      // ==========================================
+      function renderChampionSelectors() {
+        const pGrid = document.getElementById('practiceChampGrid');
+        const pvpGrid = document.getElementById('pvpChampSelectGrid');
+        pGrid.innerHTML = '';
+        pvpGrid.innerHTML = '';
+
+        Object.values(CHAMPIONS).forEach(ch => {
+          const isSel = state.selectedChamp === ch.id;
+
+          // 연습 모드 상세 카드
+          const card = document.createElement('div');
+          card.className = `rounded-2xl p-3.5 border-2 transition cursor-pointer flex flex-col justify-between gap-2.5 ${
+            isSel ? 'bg-sky-950/40 border-sky-400 frost-glow' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
+          }`;
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center text-2xl border shadow-inner" style="background:${ch.color}22; border-color:${ch.color}66">${ch.icon}</div>
+                  <div>
+                    <div class="text-sm font-black text-white">${ch.name} <span class="text-xs font-bold text-sky-300">(${ch.title})</span></div>
+                    <div class="text-[11px] font-bold text-slate-400">${ch.role} · 체력 ${ch.maxHp} · 공격 ${ch.ad}</div>
+                  </div>
+                </div>
+                ${isSel ? '<span class="px-2 py-0.5 rounded-md bg-sky-500 text-slate-950 text-[10px] font-black">선택됨</span>' : ''}
+              </div>
+              <div class="mt-2.5 text-[11px] text-amber-300/90 font-semibold">패시브: ${ch.passiveDesc}</div>
+              <div class="mt-2 grid grid-cols-2 gap-1.5 text-[10px]">
+                <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-1.5"><span class="text-sky-300 font-black">Q ${ch.skills.Q.name}</span><div class="text-slate-400 truncate">${ch.skills.Q.desc}</div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-1.5"><span class="text-sky-300 font-black">W ${ch.skills.W.name}</span><div class="text-slate-400 truncate">${ch.skills.W.desc}</div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-1.5"><span class="text-sky-300 font-black">E ${ch.skills.E.name}</span><div class="text-slate-400 truncate">${ch.skills.E.desc}</div></div>
+                <div class="bg-slate-900/90 border border-slate-800 rounded-lg p-1.5"><span class="text-fuchsia-300 font-black">R ${ch.skills.R.name}</span><div class="text-slate-400 truncate">${ch.skills.R.desc}</div></div>
+              </div>
+            </div>
+          `;
+          card.addEventListener('click', () => {
+            state.selectedChamp = ch.id;
+            saveState(false);
+            updateSelectionUI();
+          });
+          pGrid.appendChild(card);
+
+          // 대전 모드 콤팩트 버튼
+          const pBtn = document.createElement('button');
+          pBtn.type = 'button';
+          pBtn.className = `p-2.5 rounded-xl border text-left transition cursor-pointer flex items-center gap-2 ${
+            isSel ? 'bg-indigo-600/30 border-indigo-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-300 hover:border-indigo-500/60'
+          }`;
+          pBtn.innerHTML = `
+            <span class="text-xl">${ch.icon}</span>
+            <div class="min-w-0">
+              <div class="text-xs font-black truncate">${ch.name}</div>
+              <div class="text-[10px] text-slate-400 truncate">${ch.title}</div>
+            </div>
+          `;
+          pBtn.addEventListener('click', () => {
+            state.selectedChamp = ch.id;
+            saveState(false);
+            updateSelectionUI();
+          });
+          pvpGrid.appendChild(pBtn);
+        });
+      }
+
+      function updateSelectionUI() {
+        const ch = CHAMPIONS[state.selectedChamp];
+        document.getElementById('selectedChampBadge').textContent = `${ch.icon} ${ch.name} (${ch.title})`;
+        document.getElementById('practiceWaitTitle').textContent = `[${ch.name} - ${ch.title}] 선택 완료 · 출전 대기 중`;
+        document.getElementById('pvpSelectedChampLabel').textContent = `선택: ${ch.name} (${ch.title})`;
+        document.getElementById('recordBadge').textContent = `${state.wins}승 ${state.losses}패`;
+        renderChampionSelectors();
+      }
+
+      // ==========================================
+      // 5. 칼바람 나락 (Howling Abyss) 게임 엔진
+      // ==========================================
+      const WORLD_W = 1400;
+      const WORLD_H = 560;
+      const LANE_TOP = 82;
+      const LANE_BOT = 478;
+
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
+      const canvasWrapper = document.getElementById('canvasWrapper');
+      let viewW = 900;
+      let viewH = 450;
+
+      function resizeCanvas() {
+        const rect = canvasWrapper.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        viewW = Math.max(320, rect.width || 900);
+        viewH = Math.max(220, rect.height || 450);
+        canvas.width = Math.floor(viewW * dpr);
+        canvas.height = Math.floor(viewH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      window.addEventListener('resize', resizeCanvas);
+
+      let gameRunning = false;
+      let matchPaused = true;
+      let gameModeActive = 'practice'; // 'practice' | 'pvp'
+      let matchTime = 0;
+      let waveCount = 0;
+      let waveTimer = 2.0; // 첫 웨이브 빠르게 생성
+      let teamKills = { blue: 0, red: 0 };
+
+      let structures = [];
+      let portals = [];
+      let relics = [];
+      let bushes = [];
+      let minions = [];
+      let projectiles = [];
+      let vfxList = [];
+      let floatingTexts = [];
+      let snowParticles = [];
+      for (let i = 0; i < 45; i++) {
+        snowParticles.push({
+          x: Math.random() * WORLD_W,
+          y: Math.random() * WORLD_H,
+          r: 1.2 + Math.random() * 2.2,
+          vx: -18 - Math.random() * 22,
+          vy: 14 + Math.random() * 20
+        });
+      }
+
+      let myHero = null;
+      let enemyHero = null;
+      let keysPressed = {};
+      let joyVec = { x: 0, y: 0 };
+      let mouseWorld = { x: 700, y: 280 };
+      let countdownTimer = null;
+      let lastFrameTime = 0;
+      let lastSyncTime = 0;
+
+      function createHero(team, champId, name) {
+        const c = CHAMPIONS[champId] || CHAMPIONS.karen;
+        const vipBoost = (team === 'blue' && state.isVip) ? 1.15 : 1.0;
+        const startX = team === 'blue' ? 165 : WORLD_W - 165;
+        return {
+          team, champId, name,
+          x: startX, y: 280,
+          targetX: null, targetY: null,
+          radius: 24,
+          facing: team === 'blue' ? 0 : Math.PI,
+          hp: Math.round(c.maxHp), maxHp: Math.round(c.maxHp),
+          mp: c.maxMp, maxMp: c.maxMp,
+          ad: Math.round(c.ad * vipBoost),
+          range: c.range,
+          speed: c.speed * (team === 'blue' && state.isVip ? 1.1 : 1.0),
+          atkCd: c.atkCd, atkTimer: 0,
+          level: 1, xp: 0, nextXp: 120,
+          gold: (team === 'blue' && state.isVip) ? 1000 : 500,
+          items: [],
+          kills: 0, deaths: 0, cs: 0,
+          dead: false, respawnTimer: 0,
+          shield: 0, shieldTimer: 0,
+          dmgReduce: champId === 'karius' ? 0.15 : 0,
+          dmgReduceTimer: 0, reflectDmg: false,
+          qBuffTimer: 0, critNext: false,
+          stunTimer: 0, slowTimer: 0, slowAmt: 0,
+          combatTimer: 0, warmogRegen: false,
+          flashTimer: 0, portalCd: 0, dashTimer: 0, dashVx: 0, dashVy: 0,
+          cds: { Q: 0, W: 0, E: 0, R: 0, D: 0 },
+          inBush: false
+        };
+      }
+
+      function initArenaEntities() {
+        structures = [
+          // 블루팀 (왼쪽 끝 넥서스 + 2차 포탑 + 1차 포탑)
+          { id: 'blue_nexus', team: 'blue', type: 'nexus', name: '블루 넥서스', x: 105, y: 280, radius: 42, hp: 3000, maxHp: 3000, range: 0, atkCd: 0, atkTimer: 0, dmg: 0 },
+          { id: 'blue_t2', team: 'blue', type: 'turret', name: '블루 2차 포탑', x: 255, y: 280, radius: 26, hp: 1800, maxHp: 1800, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 95 },
+          { id: 'blue_t1', team: 'blue', type: 'turret', name: '블루 1차 포탑', x: 445, y: 280, radius: 26, hp: 1500, maxHp: 1500, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 85 },
+          // 레드팀 (오른쪽 끝 넥서스 + 2차 포탑 + 1차 포탑)
+          { id: 'red_nexus', team: 'red', type: 'nexus', name: '레드 넥서스', x: WORLD_W - 105, y: 280, radius: 42, hp: 3000, maxHp: 3000, range: 0, atkCd: 0, atkTimer: 0, dmg: 0 },
+          { id: 'red_t2', team: 'red', type: 'turret', name: '레드 2차 포탑', x: WORLD_W - 255, y: 280, radius: 26, hp: 1800, maxHp: 1800, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 95 },
+          { id: 'red_t1', team: 'red', type: 'turret', name: '레드 1차 포탑', x: WORLD_W - 445, y: 280, radius: 26, hp: 1500, maxHp: 1500, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 85 }
+        ];
+
+        // 양쪽 미니언 생성 & 마법공학 차원문 포탈 2개씩
+        portals = [
+          { team: 'blue', x: 160, y: 170, radius: 24, destX: 390, destY: 200 },
+          { team: 'blue', x: 160, y: 390, radius: 24, destX: 390, destY: 360 },
+          { team: 'red', x: WORLD_W - 160, y: 170, radius: 24, destX: WORLD_W - 390, destY: 200 },
+          { team: 'red', x: WORLD_W - 160, y: 390, radius: 24, destX: WORLD_W - 390, destY: 360 }
+        ];
+
+        // 다리 위 체력의 유물 2개
+        relics = [
+          { x: 585, y: 135, radius: 18, active: true, timer: 0 },
+          { x: 815, y: 425, radius: 18, active: true, timer: 0 }
+        ];
+
+        // 칼바람 중앙 부시 2개
+        bushes = [
+          { x: 640, y: 105, w: 120, h: 46 },
+          { x: 640, y: 409, w: 120, h: 46 }
+        ];
+
+        minions = [];
+        projectiles = [];
+        vfxList = [];
+        floatingTexts = [];
+      }
+
+      function spawnMinionWave() {
+        waveCount++;
+        const isCannon = waveCount % 2 === 0;
+        document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount}${isCannon ? ' (대포)' : ''}`;
+
+        ['blue', 'red'].forEach(team => {
+          const teamPortals = portals.filter(p => p.team === team);
+          teamPortals.forEach((pt, idx) => {
+            // 각 포탈에서 근접 1 + 원거리 1 생성
+            minions.push({
+              team, kind: 'melee', x: pt.x, y: pt.y + (idx === 0 ? -12 : 12),
+              radius: 13, hp: 240 + waveCount * 18, maxHp: 240 + waveCount * 18,
+              ad: 18 + waveCount * 2, range: 36, speed: 78, atkCd: 1.0, atkTimer: 0, gold: 22
+            });
+            minions.push({
+              team, kind: 'caster', x: pt.x + (team === 'blue' ? -22 : 22), y: pt.y,
+              radius: 11, hp: 165 + waveCount * 14, maxHp: 165 + waveCount * 14,
+              ad: 24 + waveCount * 2, range: 145, speed: 76, atkCd: 1.15, atkTimer: 0, gold: 18
+            });
+            if (isCannon && idx === 0) {
+              minions.push({
+                team, kind: 'cannon', x: pt.x, y: 280,
+                radius: 17, hp: 460 + waveCount * 30, maxHp: 460 + waveCount * 30,
+                ad: 38 + waveCount * 3, range: 165, speed: 72, atkCd: 1.25, atkTimer: 0, gold: 48
+              });
+            }
+          });
+          vfxList.push({ type: 'ring', x: team === 'blue' ? 160 : WORLD_W - 160, y: 280, r: 10, maxR: 55, color: team === 'blue' ? '#38bdf8' : '#f43f5e', life: 0.5 });
+        });
+      }
+
+      function startAramMatch(mode) {
+        gameModeActive = mode;
+        document.getElementById('practiceSelectSection').classList.add('hidden');
+        document.getElementById('pvpLobbySection').classList.add('hidden');
+        document.getElementById('pvpLobbySection').classList.remove('flex');
+        document.getElementById('gameAreaSection').classList.remove('hidden');
+        document.getElementById('gameAreaSection').classList.add('flex');
+        document.getElementById('matchResultBanner').classList.add('hidden');
+        document.getElementById('matchResultBanner').classList.remove('flex');
+        document.getElementById('shopOverlay').classList.add('hidden');
+        document.getElementById('shopOverlay').classList.remove('flex');
+
+        resizeCanvas();
+        initArenaEntities();
+        matchTime = 0;
+        waveCount = 0;
+        waveTimer = 1.0;
+        teamKills = { blue: 0, red: 0 };
+
+        if (mode === 'practice') {
+          const myC = state.selectedChamp;
+          const aiSel = document.getElementById('aiChampSelect').value;
+          const pool = Object.keys(CHAMPIONS).filter(k => k !== myC);
+          const aiC = aiSel === 'auto' ? pool[Math.floor(Math.random() * pool.length)] : aiSel;
+          myHero = createHero('blue', myC, getDisplayName());
+          enemyHero = createHero('red', aiC, `AI ${CHAMPIONS[aiC].name}`);
+        } else {
+          const blueH = createHero('blue', pvpLeftChamp, pvpLeftName);
+          const redH = createHero('red', pvpRightChamp, pvpRightName);
+          if (pvpRole === 'left') { myHero = blueH; enemyHero = redH; }
+          else { myHero = redH; enemyHero = blueH; }
+        }
+
+        setupHudForHero(myHero);
+        gameRunning = true;
+        matchPaused = true;
+        if (state.bgmEnabled) startBGM();
+        runCountdown();
+        lastFrameTime = 0;
+        requestAnimationFrame(aramLoop);
+      }
+
+      function setupHudForHero(h) {
+        const c = CHAMPIONS[h.champId];
+        document.getElementById('hudPortrait').textContent = c.icon;
+        document.getElementById('hudChampName').textContent = `${c.name} (${c.title})`;
+        ['Q', 'W', 'E', 'R'].forEach(k => {
+          document.getElementById('icon' + k).textContent = c.skills[k].icon;
+          document.getElementById('name' + k).textContent = c.skills[k].name;
+        });
+        updateInGameHud();
+      }
+
+      function runCountdown() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        const co = document.getElementById('countdownOverlay');
+        const ct = document.getElementById('countdownText');
+        let n = 3;
+        ct.textContent = '3';
+        co.classList.remove('hidden');
+        co.classList.add('flex');
+        countdownTimer = setInterval(() => {
+          n--;
+          if (n > 0) ct.textContent = String(n);
+          else if (n === 0) ct.textContent = '칼바람 개전!';
+          else {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+            co.classList.add('hidden');
+            co.classList.remove('flex');
+            matchPaused = false;
+          }
+        }, 650);
+      }
+
+      function endAramMatch(winnerTeam, subMsg) {
+        if (!gameRunning) return;
+        gameRunning = false;
+        matchPaused = true;
+        const iWon = myHero && myHero.team === winnerTeam;
+        if (iWon) state.wins++;
+        else state.losses++;
+        saveState(true);
+        updateSelectionUI();
+
+        document.getElementById('matchWinnerTitle').textContent = iWon ? '🏆 칼바람 승리!' : '💀 패배...';
+        document.getElementById('matchWinnerTitle').className = 'text-2xl sm:text-3xl font-black ' + (iWon ? 'text-amber-300' : 'text-rose-400');
+        document.getElementById('matchResultSub').textContent = subMsg || (iWon ? '적 넥서스를 파괴했습니다!' : '아군 넥서스가 파괴되었습니다.');
+        const mb = document.getElementById('matchResultBanner');
+        mb.classList.remove('hidden');
+        mb.classList.add('flex');
+      }
+
+      // ==========================================
+      // 6. 전투, 스킬, 미니언 & 포탑 AI 로직
+      // ==========================================
+      function dealDamage(target, amount, attacker) {
+        if (!target || target.hp <= 0 || target.dead) return;
+        let dmg = amount;
+        if (target.dmgReduce) dmg *= (1 - target.dmgReduce);
+        if (target.shield > 0) {
+          const absorbed = Math.min(target.shield, dmg);
+          target.shield -= absorbed;
+          dmg -= absorbed;
+        }
+        target.hp = Math.max(0, target.hp - dmg);
+        if (target.reflectDmg && attacker && !attacker.dead && Math.hypot(attacker.x - target.x, attacker.y - target.y) < 110) {
+          attacker.hp = Math.max(1, attacker.hp - 18);
+        }
+        if (target.champId) target.combatTimer = 4.0;
+
+        floatingTexts.push({
+          x: target.x + (Math.random() - 0.5) * 16,
+          y: target.y - (target.radius || 18) - 6,
+          text: `-${Math.round(dmg)}`,
+          color: '#fca5a5',
+          life: 0.7
+        });
+
+        if (target.hp <= 0) {
+          handleEntityDeath(target, attacker);
+        }
+      }
+
+      function handleEntityDeath(target, killer) {
+        if (target.type === 'nexus') {
+          endAramMatch(target.team === 'blue' ? 'red' : 'blue', `${target.name}가 파괴되었습니다!`);
+          return;
+        }
+        if (target.type === 'turret') {
+          vfxList.push({ type: 'ring', x: target.x, y: target.y, r: 10, maxR: 90, color: '#fbbf24', life: 0.7 });
+          if (myHero && myHero.team !== target.team) { myHero.gold += 200; gainXp(myHero, 90); }
+          if (enemyHero && enemyHero.team !== target.team) { enemyHero.gold += 200; gainXp(enemyHero, 90); }
+          showToast(`💥 ${target.name} 파괴! (+200 G)`);
+          return;
+        }
+        if (target.kind) {
+          // 미니언 사망
+          if (killer && killer.champId) {
+            killer.gold += target.gold;
+            killer.cs++;
+            gainXp(killer, 32);
+            if (killer === myHero) {
+              playSfx('gold');
+              floatingTexts.push({ x: target.x, y: target.y - 20, text: `+${target.gold}G`, color: '#fde047', life: 0.8 });
+            }
+          }
+          return;
+        }
+        if (target.champId) {
+          // 챔피언 사망
+          target.dead = true;
+          target.deaths++;
+          target.respawnTimer = 4 + Math.min(8, target.level);
+          teamKills[target.team === 'blue' ? 'red' : 'blue']++;
+          if (killer && killer.champId) {
+            killer.kills++;
+            killer.gold += 300;
+            gainXp(killer, 140);
+          } else {
+            const opp = target === myHero ? enemyHero : myHero;
+            if (opp) { opp.gold += 150; gainXp(opp, 80); }
+          }
+          vfxList.push({ type: 'ring', x: target.x, y: target.y, r: 12, maxR: 70, color: '#ef4444', life: 0.6 });
+        }
+      }
+
+      function gainXp(hero, amt) {
+        if (!hero) return;
+        hero.xp += amt;
+        while (hero.xp >= hero.nextXp && hero.level < 18) {
+          hero.xp -= hero.nextXp;
+          hero.level++;
+          hero.nextXp = Math.round(hero.nextXp * 1.25);
+          hero.maxHp += 95;
+          hero.hp = Math.min(hero.maxHp, hero.hp + 95);
+          hero.ad += 6;
+          floatingTexts.push({ x: hero.x, y: hero.y - 36, text: `LEVEL ${hero.level}!`, color: '#38bdf8', life: 1.0 });
+        }
+      }
+
+      function findNearestEnemy(unit, maxRange) {
+        const oppTeam = unit.team === 'blue' ? 'red' : 'blue';
+        let best = null;
+        let bestDist = maxRange;
+
+        // 1. 미니언 우선 또는 사거리 내 적
+        minions.forEach(m => {
+          if (m.team === oppTeam && m.hp > 0) {
+            const d = Math.hypot(m.x - unit.x, m.y - unit.y);
+            if (d < bestDist) { bestDist = d; best = m; }
+          }
+        });
+        // 2. 적 챔피언
+        [myHero, enemyHero].forEach(h => {
+          if (h && h.team === oppTeam && !h.dead && h.hp > 0) {
+            const d = Math.hypot(h.x - unit.x, h.y - unit.y);
+            if (d < bestDist) { bestDist = d; best = h; }
+          }
+        });
+        // 3. 적 포탑/넥서스
+        structures.forEach(s => {
+          if (s.team === oppTeam && s.hp > 0) {
+            const d = Math.hypot(s.x - unit.x, s.y - unit.y);
+            if (d < bestDist + s.radius) { bestDist = d; best = s; }
+          }
+        });
+        return best;
+      }
+
+      function performHeroAttack(hero) {
+        if (!hero || hero.dead || hero.stunTimer > 0 || hero.atkTimer > 0) return;
+        const target = findNearestEnemy(hero, hero.range + 45);
+        if (!target) return;
+
+        hero.atkTimer = hero.qBuffTimer > 0 ? hero.atkCd * 0.78 : hero.atkCd;
+        hero.facing = Math.atan2(target.y - hero.y, target.x - hero.x);
+        if (hero === myHero) playSfx('atk');
+
+        let dmg = hero.ad;
+        if (hero.critNext) { dmg *= 1.65; hero.critNext = false; }
+
+        if (hero.champId === 'cash') {
+          // 원거리 화살 발사
+          projectiles.push({
+            team: hero.team, owner: hero, x: hero.x, y: hero.y,
+            tx: target.x, ty: target.y, target, speed: 620, dmg,
+            color: '#38bdf8', radius: 5, slow: true
+          });
+          if (hero.qBuffTimer > 0) {
+            projectiles.push({
+              team: hero.team, owner: hero, x: hero.x, y: hero.y + 8,
+              tx: target.x, ty: target.y, target, speed: 620, dmg: dmg * 0.45,
+              color: '#bae6fd', radius: 4, slow: true
+            });
+          }
+        } else {
+          // 근접 베기
+          vfxList.push({ type: 'slash', x: hero.x, y: hero.y, angle: hero.facing, r: hero.range, color: CHAMPIONS[hero.champId].accent, life: 0.22 });
+          dealDamage(target, dmg, hero);
+        }
+      }
+
+      function castHeroSkill(hero, key, aimX, aimY) {
+        if (!hero || hero.dead || hero.stunTimer > 0) return;
+        const c = CHAMPIONS[hero.champId];
+
+        if (key === 'D') {
+          if (hero.cds.D > 0) return;
+          hero.cds.D = 22;
+          const ang = Math.atan2((aimY ?? hero.y) - hero.y, (aimX ?? hero.x + Math.cos(hero.facing) * 100) - hero.x);
+          vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 8, maxR: 40, color: '#fde047', life: 0.35 });
+          hero.x = Math.max(40, Math.min(WORLD_W - 40, hero.x + Math.cos(ang) * 145));
+          hero.y = Math.max(LANE_TOP, Math.min(LANE_BOT, hero.y + Math.sin(ang) * 145));
+          hero.targetX = null; hero.targetY = null;
+          vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 8, maxR: 45, color: '#fde047', life: 0.35 });
+          if (hero === myHero) playSfx('skill');
+          return;
+        }
+
+        const sk = c.skills[key];
+        if (!sk || hero.cds[key] > 0) return;
+        if (hero.mp < sk.mp) {
+          if (hero === myHero) showToast('마나가 부족합니다!');
+          return;
+        }
+        hero.mp -= sk.mp;
+        hero.cds[key] = sk.cd;
+        if (hero === myHero) playSfx(key === 'R' ? 'ult' : 'skill');
+
+        const ang = (aimX !== undefined && aimY !== undefined)
+          ? Math.atan2(aimY - hero.y, aimX - hero.x)
+          : hero.facing;
+        hero.facing = ang;
+
+        const oppTeam = hero.team === 'blue' ? 'red' : 'blue';
+        const getEnemiesInRadius = (cx, cy, rad) => {
+          const list = [];
+          minions.forEach(m => { if (m.team === oppTeam && m.hp > 0 && Math.hypot(m.x - cx, m.y - cy) <= rad + m.radius) list.push(m); });
+          [myHero, enemyHero].forEach(h => { if (h && h.team === oppTeam && !h.dead && Math.hypot(h.x - cx, h.y - cy) <= rad + h.radius) list.push(h); });
+          structures.forEach(s => { if (s.team === oppTeam && s.hp > 0 && Math.hypot(s.x - cx, s.y - cy) <= rad + s.radius) list.push(s); });
+          return list;
+        };
+
+        if (hero.champId === 'karen') {
+          if (key === 'Q') {
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 20, maxR: 115, color: '#fbbf24', life: 0.4 });
+            getEnemiesInRadius(hero.x, hero.y, 115).forEach(t => dealDamage(t, 135 + hero.ad * 0.7, hero));
+          } else if (key === 'W') {
+            hero.shield = 240; hero.shieldTimer = 3.0;
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 15, maxR: 52, color: '#38bdf8', life: 0.5 });
+          } else if (key === 'E') {
+            hero.dashTimer = 0.22;
+            hero.dashVx = Math.cos(ang) * 580;
+            hero.dashVy = Math.sin(ang) * 580;
+            hero.targetX = null; hero.targetY = null;
+            vfxList.push({ type: 'slash', x: hero.x + Math.cos(ang) * 60, y: hero.y + Math.sin(ang) * 60, angle: ang, r: 105, color: '#38bdf8', life: 0.35 });
+            getEnemiesInRadius(hero.x + Math.cos(ang) * 75, hero.y + Math.sin(ang) * 75, 110).forEach(t => { dealDamage(t, 115 + hero.ad * 0.4, hero); if (t.champId) { t.slowTimer = 1.0; t.slowAmt = 0.35; } });
+          } else if (key === 'R') {
+            const tx = hero.x + Math.cos(ang) * 110;
+            const ty = hero.y + Math.sin(ang) * 110;
+            vfxList.push({ type: 'ultSword', x: tx, y: ty, color: '#fde047', life: 0.75 });
+            getEnemiesInRadius(tx, ty, 130).forEach(t => {
+              const missingRatio = t.maxHp ? (1 - t.hp / t.maxHp) : 0;
+              dealDamage(t, 260 + missingRatio * 140, hero);
+            });
+          }
+        } else if (hero.champId === 'cash') {
+          if (key === 'Q') {
+            hero.qBuffTimer = 4.0;
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 10, maxR: 48, color: '#22d3ee', life: 0.45 });
+          } else if (key === 'W') {
+            for (let i = -3; i <= 3; i++) {
+              const a = ang + i * 0.12;
+              projectiles.push({
+                team: hero.team, owner: hero, x: hero.x, y: hero.y,
+                vx: Math.cos(a) * 520, vy: Math.sin(a) * 520,
+                speed: 520, dmg: 72 + hero.ad * 0.35, color: '#67e8f9', radius: 5, slow: true, linear: true, life: 0.75
+              });
+            }
+          } else if (key === 'E') {
+            hero.x = Math.max(40, Math.min(WORLD_W - 40, hero.x - Math.cos(ang) * 120));
+            hero.y = Math.max(LANE_TOP, Math.min(LANE_BOT, hero.y - Math.sin(ang) * 120));
+            hero.critNext = true;
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 10, maxR: 42, color: '#bae6fd', life: 0.35 });
+          } else if (key === 'R') {
+            projectiles.push({
+              team: hero.team, owner: hero, x: hero.x, y: hero.y,
+              vx: Math.cos(ang) * 580, vy: Math.sin(ang) * 580,
+              speed: 580, dmg: 260 + hero.ad * 0.6, color: '#38bdf8', radius: 16, stun: 1.8, linear: true, life: 2.5, isUltArrow: true
+            });
+          }
+        } else if (hero.champId === 'karius') {
+          if (key === 'Q') {
+            hero.dashTimer = 0.24;
+            hero.dashVx = Math.cos(ang) * 460;
+            hero.dashVy = Math.sin(ang) * 460;
+            hero.targetX = null; hero.targetY = null;
+            vfxList.push({ type: 'ring', x: hero.x + Math.cos(ang) * 55, y: hero.y + Math.sin(ang) * 55, r: 15, maxR: 95, color: '#60a5fa', life: 0.4 });
+            getEnemiesInRadius(hero.x + Math.cos(ang) * 65, hero.y + Math.sin(ang) * 65, 100).forEach(t => { dealDamage(t, 110, hero); if (t.champId) t.stunTimer = 0.9; });
+          } else if (key === 'W') {
+            hero.dmgReduce = 0.45; hero.dmgReduceTimer = 3.5; hero.reflectDmg = true;
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 18, maxR: 58, color: '#93c5fd', life: 0.5 });
+          } else if (key === 'E') {
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 18, maxR: 135, color: '#94a3b8', life: 0.45 });
+            getEnemiesInRadius(hero.x, hero.y, 135).forEach(t => { dealDamage(t, 125, hero); if (t.champId) { t.slowTimer = 2.0; t.slowAmt = 0.4; } });
+          } else if (key === 'R') {
+            hero.hp = Math.min(hero.maxHp, hero.hp + 280);
+            vfxList.push({ type: 'ring', x: hero.x, y: hero.y, r: 22, maxR: 165, color: '#e2e8f0', life: 0.65 });
+            floatingTexts.push({ x: hero.x, y: hero.y - 34, text: '+280 HP', color: '#4ade80', life: 0.9 });
+            getEnemiesInRadius(hero.x, hero.y, 165).forEach(t => { dealDamage(t, 210, hero); if (t.champId) t.stunTimer = 1.8; });
+          }
+        }
+      }
+
+      // ==========================================
+      // 7. 메인 게임 루프 & 칼바람 나락 렌더링
+      // ==========================================
+      function updateAiHero(ai, opp, dt) {
+        if (!ai || ai.dead || ai.stunTimer > 0) return;
+        const safeX = ai.team === 'red' ? WORLD_W - 220 : 220;
+
+        // 체력이 28% 미만이면 후퇴
+        if (ai.hp / ai.maxHp < 0.28) {
+          ai.targetX = safeX;
+          ai.targetY = 280;
+          if (ai.cds.W <= 0) castHeroSkill(ai, 'W', opp.x, opp.y);
+          return;
+        }
+
+        // 가까운 유물 챙기기
+        const activeRelic = relics.find(r => r.active && Math.hypot(r.x - ai.x, r.y - ai.y) < 180);
+        if (activeRelic && ai.hp < ai.maxHp * 0.75) {
+          ai.targetX = activeRelic.x; ai.targetY = activeRelic.y;
+          return;
+        }
+
+        const target = findNearestEnemy(ai, 420);
+        if (target) {
+          const dist = Math.hypot(target.x - ai.x, target.y - ai.y);
+          const idealDist = ai.range * 0.88;
+          if (dist > idealDist) {
+            ai.targetX = target.x;
+            ai.targetY = target.y;
+          } else {
+            ai.targetX = null; ai.targetY = null;
+            performHeroAttack(ai);
+            if (target.champId || dist < 170) {
+              if (ai.cds.Q <= 0 && Math.random() < 0.08) castHeroSkill(ai, 'Q', target.x, target.y);
+              else if (ai.cds.E <= 0 && Math.random() < 0.05) castHeroSkill(ai, 'E', target.x, target.y);
+              else if (ai.cds.R <= 0 && target.champId && Math.random() < 0.04) castHeroSkill(ai, 'R', target.x, target.y);
+            }
+          }
+        } else {
+          ai.targetX = ai.team === 'red' ? 680 : 720;
+          ai.targetY = 280;
+        }
+      }
+
+      function updateHero(h, dt) {
+        if (!h) return;
+        if (h.dead) {
+          h.respawnTimer -= dt;
+          if (h === myHero) {
+            document.getElementById('respawnOverlay').classList.remove('hidden');
+            document.getElementById('respawnOverlay').classList.add('flex');
+            document.getElementById('respawnTimerText').textContent = `부활까지 ${Math.max(1, Math.ceil(h.respawnTimer))}초`;
+          }
+          if (h.respawnTimer <= 0) {
+            h.dead = false;
+            h.hp = h.maxHp;
+            h.mp = h.maxMp;
+            h.x = h.team === 'blue' ? 145 : WORLD_W - 145;
+            h.y = 280;
+            h.targetX = null; h.targetY = null;
+            if (h === myHero) {
+              document.getElementById('respawnOverlay').classList.add('hidden');
+              document.getElementById('respawnOverlay').classList.remove('flex');
+            }
+          }
+          return;
+        }
+
+        // 쿨다운 & 버프 감소
+        ['Q', 'W', 'E', 'R', 'D'].forEach(k => { if (h.cds[k] > 0) h.cds[k] = Math.max(0, h.cds[k] - dt); });
+        if (h.atkTimer > 0) h.atkTimer = Math.max(0, h.atkTimer - dt);
+        if (h.stunTimer > 0) h.stunTimer = Math.max(0, h.stunTimer - dt);
+        if (h.slowTimer > 0) h.slowTimer = Math.max(0, h.slowTimer - dt);
+        if (h.qBuffTimer > 0) h.qBuffTimer = Math.max(0, h.qBuffTimer - dt);
+        if (h.portalCd > 0) h.portalCd = Math.max(0, h.portalCd - dt);
+        if (h.shieldTimer > 0) { h.shieldTimer -= dt; if (h.shieldTimer <= 0) h.shield = 0; }
+        if (h.dmgReduceTimer > 0) {
+          h.dmgReduceTimer -= dt;
+          if (h.dmgReduceTimer <= 0) { h.dmgReduce = h.champId === 'karius' ? 0.15 : 0; h.reflectDmg = false; }
+        }
+        if (h.combatTimer > 0) h.combatTimer -= dt;
+
+        // 마나/체력 재생 & 넥서스 우물 회복
+        h.mp = Math.min(h.maxMp, h.mp + 14 * dt);
+        h.gold += (state.isVip && h === myHero ? 6 : 3) * dt;
+        const nearHome = (h.team === 'blue' && h.x < 185) || (h.team === 'red' && h.x > WORLD_W - 185);
+        if (nearHome) {
+          h.hp = Math.min(h.maxHp, h.hp + 95 * dt);
+          h.mp = Math.min(h.maxMp, h.mp + 45 * dt);
+        } else if (h.combatTimer <= 0 && (h.champId === 'karen' || h.warmogRegen)) {
+          h.hp = Math.min(h.maxHp, h.hp + h.maxHp * (h.warmogRegen ? 0.04 : 0.02) * dt);
+        }
+
+        if (h.stunTimer > 0) return;
+
+        if (h.dashTimer > 0) {
+          h.dashTimer = Math.max(0, h.dashTimer - dt);
+          h.x += h.dashVx * dt;
+          h.y += h.dashVy * dt;
+          h.x = Math.max(38, Math.min(WORLD_W - 38, h.x));
+          h.y = Math.max(LANE_TOP + 10, Math.min(LANE_BOT - 10, h.y));
+          return;
+        }
+
+        // 이동 처리
+        let mx = 0, my = 0;
+        if (h === myHero) {
+          if (keysPressed['ArrowUp']) my -= 1;
+          if (keysPressed['ArrowDown']) my += 1;
+          if (keysPressed['ArrowLeft']) mx -= 1;
+          if (keysPressed['ArrowRight']) mx += 1;
+          if (Math.hypot(joyVec.x, joyVec.y) > 0.1) { mx = joyVec.x; my = joyVec.y; }
+        }
+
+        const spd = h.speed * (h.slowTimer > 0 ? (1 - h.slowAmt) : 1);
+        if (mx !== 0 || my !== 0) {
+          h.targetX = null; h.targetY = null;
+          const len = Math.hypot(mx, my) || 1;
+          h.x += (mx / len) * spd * dt;
+          h.y += (my / len) * spd * dt;
+          h.facing = Math.atan2(my, mx);
+        } else if (h.targetX !== null && h.targetY !== null) {
+          const dx = h.targetX - h.x, dy = h.targetY - h.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 6) {
+            h.x += (dx / dist) * spd * dt;
+            h.y += (dy / dist) * spd * dt;
+            h.facing = Math.atan2(dy, dx);
+          } else {
+            h.targetX = null; h.targetY = null;
+          }
+        }
+
+        h.x = Math.max(38, Math.min(WORLD_W - 38, h.x));
+        h.y = Math.max(LANE_TOP + 10, Math.min(LANE_BOT - 10, h.y));
+
+        // 부시 은신 판정
+        h.inBush = bushes.some(b => h.x >= b.x && h.x <= b.x + b.w && h.y >= b.y && h.y <= b.y + b.h);
+
+        // 마법공학 차원문 포탈 워프 (아군 포탈 근처 진입 시 1차 포탑 근처로 이동)
+        if (h.portalCd <= 0) {
+          const ownPortal = portals.find(p => p.team === h.team && Math.hypot(p.x - h.x, p.y - h.y) < p.radius + 10);
+          if (ownPortal) {
+            h.portalCd = 14;
+            vfxList.push({ type: 'ring', x: h.x, y: h.y, r: 8, maxR: 48, color: '#38bdf8', life: 0.4 });
+            h.x = ownPortal.destX;
+            h.y = ownPortal.destY;
+            h.targetX = null; h.targetY = null;
+            vfxList.push({ type: 'ring', x: h.x, y: h.y, r: 8, maxR: 48, color: '#38bdf8', life: 0.4 });
+            if (h === myHero) showToast('🌀 마법공학 차원문 이동!');
+          }
+        }
+      }
+
+      function updateMinionsAndStructures(dt) {
+        // 미니언 이동 & 공격
+        for (let i = minions.length - 1; i >= 0; i--) {
+          const m = minions[i];
+          if (m.hp <= 0) { minions.splice(i, 1); continue; }
+          if (m.atkTimer > 0) m.atkTimer -= dt;
+          const target = findNearestEnemy(m, m.range + 110);
+          if (target) {
+            const dist = Math.hypot(target.x - m.x, target.y - m.y);
+            if (dist <= m.range + (target.radius || 16)) {
+              if (m.atkTimer <= 0) {
+                m.atkTimer = m.atkCd;
+                if (m.kind === 'melee') dealDamage(target, m.ad, m);
+                else projectiles.push({ team: m.team, owner: m, x: m.x, y: m.y, target, speed: 360, dmg: m.ad, color: m.team === 'blue' ? '#60a5fa' : '#fb7185', radius: 4 });
+              }
+            } else {
+              m.x += ((target.x - m.x) / dist) * m.speed * dt;
+              m.y += ((target.y - m.y) / dist) * m.speed * dt;
+            }
+          } else {
+            const dir = m.team === 'blue' ? 1 : -1;
+            m.x += dir * m.speed * dt;
+            m.y += (280 - m.y) * 0.4 * dt;
+          }
+        }
+
+        // 포탑 공격
+        structures.forEach(s => {
+          if (s.type !== 'turret' || s.hp <= 0) return;
+          if (s.atkTimer > 0) s.atkTimer -= dt;
+          const oppTeam = s.team === 'blue' ? 'red' : 'blue';
+          // 사거리 내 미니언 우선, 없으면 챔피언
+          let target = minions.find(m => m.team === oppTeam && m.hp > 0 && Math.hypot(m.x - s.x, m.y - s.y) <= s.range);
+          if (!target) {
+            target = [myHero, enemyHero].find(h => h && h.team === oppTeam && !h.dead && Math.hypot(h.x - s.x, h.y - s.y) <= s.range);
+          }
+          if (target && s.atkTimer <= 0) {
+            s.atkTimer = s.atkCd;
+            projectiles.push({
+              team: s.team, owner: s, x: s.x, y: s.y - 16, target,
+              speed: 440, dmg: s.dmg, color: s.team === 'blue' ? '#38bdf8' : '#f43f5e', radius: 7
+            });
+          }
+        });
+
+        // 체력의 유물
+        relics.forEach(r => {
+          if (!r.active) {
+            r.timer -= dt;
+            if (r.timer <= 0) r.active = true;
+            return;
+          }
+          [myHero, enemyHero].forEach(h => {
+            if (r.active && h && !h.dead && Math.hypot(h.x - r.x, h.y - r.y) <= r.radius + h.radius) {
+              r.active = false;
+              r.timer = 22;
+              h.hp = Math.min(h.maxHp, h.hp + 200);
+              h.mp = Math.min(h.maxMp, h.mp + 80);
+              vfxList.push({ type: 'ring', x: r.x, y: r.y, r: 10, maxR: 75, color: '#4ade80', life: 0.6 });
+              floatingTexts.push({ x: h.x, y: h.y - 30, text: '+200 HP', color: '#4ade80', life: 0.9 });
+            }
+          });
+        });
+
+        // 투사체
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+          const pr = projectiles[i];
+          if (pr.linear) {
+            pr.x += pr.vx * dt;
+            pr.y += pr.vy * dt;
+            pr.life -= dt;
+            if (pr.life <= 0 || pr.x < 0 || pr.x > WORLD_W || pr.y < 0 || pr.y > WORLD_H) { projectiles.splice(i, 1); continue; }
+            const oppTeam = pr.team === 'blue' ? 'red' : 'blue';
+            const hitTargets = [
+              ...minions.filter(m => m.team === oppTeam && m.hp > 0),
+              ...[myHero, enemyHero].filter(h => h && h.team === oppTeam && !h.dead)
+            ];
+            const hit = hitTargets.find(t => Math.hypot(t.x - pr.x, t.y - pr.y) <= pr.radius + (t.radius || 14));
+            if (hit) {
+              dealDamage(hit, pr.dmg, pr.owner);
+              if (pr.slow && hit.champId) { hit.slowTimer = 1.5; hit.slowAmt = 0.3; }
+              if (pr.stun && hit.champId) { hit.stunTimer = pr.stun; }
+              if (pr.isUltArrow) vfxList.push({ type: 'ring', x: pr.x, y: pr.y, r: 12, maxR: 75, color: '#38bdf8', life: 0.5 });
+              projectiles.splice(i, 1);
+            }
+          } else {
+            const t = pr.target;
+            if (!t || t.hp <= 0 || t.dead) { projectiles.splice(i, 1); continue; }
+            const dx = t.x - pr.x, dy = t.y - pr.y, d = Math.hypot(dx, dy);
+            if (d <= pr.speed * dt + 10) {
+              dealDamage(t, pr.dmg, pr.owner);
+              if (pr.slow && t.champId) { t.slowTimer = 1.5; t.slowAmt = 0.2; }
+              projectiles.splice(i, 1);
+            } else {
+              pr.x += (dx / d) * pr.speed * dt;
+              pr.y += (dy / d) * pr.speed * dt;
+            }
+          }
+        }
+      }
+
+      function applyHostSnapshot(snap) {
+        if (!snap) return;
+        matchTime = snap.matchTime ?? matchTime;
+        teamKills = snap.teamKills ?? teamKills;
+        if (Array.isArray(snap.structures)) {
+          snap.structures.forEach((s, idx) => { if (structures[idx]) structures[idx].hp = s.hp; });
+        }
+        if (Array.isArray(snap.minions)) minions = snap.minions;
+        if (Array.isArray(snap.projectiles)) projectiles = snap.projectiles;
+        if (snap.blueHero && pvpRole === 'right' && enemyHero && myHero) {
+          Object.assign(enemyHero, snap.blueHero);
+          Object.assign(myHero, snap.redHero);
+        }
+      }
+
+      function drawHowlingAbyss() {
+        // 1. 심연 배경 (칼바람 나락)
+        const abyssGrad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
+        abyssGrad.addColorStop(0, '#020617');
+        abyssGrad.addColorStop(0.5, '#0c192c');
+        abyssGrad.addColorStop(1, '#020617');
+        ctx.fillStyle = abyssGrad;
+        ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+
+        // 2. 거대한 빙하 다리 본체
+        const bridgeGrad = ctx.createLinearGradient(0, LANE_TOP, 0, LANE_BOT);
+        bridgeGrad.addColorStop(0, '#1e293b');
+        bridgeGrad.addColorStop(0.15, '#334155');
+        bridgeGrad.addColorStop(0.5, '#1e3a5f');
+        bridgeGrad.addColorStop(0.85, '#334155');
+        bridgeGrad.addColorStop(1, '#1e293b');
+        ctx.fillStyle = bridgeGrad;
+        ctx.fillRect(30, LANE_TOP, WORLD_W - 60, LANE_BOT - LANE_TOP);
+
+        // 다리 양쪽 난간 테두리 (얼음 빛)
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(30, LANE_TOP); ctx.lineTo(WORLD_W - 30, LANE_TOP);
+        ctx.moveTo(30, LANE_BOT); ctx.lineTo(WORLD_W - 30, LANE_BOT);
+        ctx.stroke();
+
+        // 바닥 석판 타일 & 중앙 칼바람 룬 문양
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.14)';
+        ctx.lineWidth = 1.5;
+        for (let x = 90; x < WORLD_W - 60; x += 90) {
+          ctx.beginPath(); ctx.moveTo(x, LANE_TOP); ctx.lineTo(x, LANE_BOT); ctx.stroke();
+        }
+        ctx.save();
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(WORLD_W / 2, 280, 95, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(WORLD_W / 2, 280, 62, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+
+        // 3. 부시 (수풀)
+        bushes.forEach(b => {
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.28)';
+          ctx.strokeStyle = 'rgba(52, 211, 153, 0.65)';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 14); ctx.fill(); ctx.stroke();
+          ctx.fillStyle = 'rgba(110, 231, 183, 0.8)';
+          ctx.font = 'bold 11px "Noto Sans KR"';
+          ctx.textAlign = 'center';
+          ctx.fillText('🌿 은신 부시', b.x + b.w / 2, b.y + b.h / 2 + 4);
+        });
+
+        // 4. 양쪽 포탈 2개씩 (마법공학 차원문 / 미니언 생성 포탈)
+        portals.forEach(p => {
+          const pulse = 1 + Math.sin(matchTime * 4) * 0.12;
+          const col = p.team === 'blue' ? '#38bdf8' : '#fb7185';
+          ctx.save();
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = col; ctx.shadowBlur = 12;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.radius * pulse, 0, Math.PI * 2); ctx.stroke();
+          ctx.fillStyle = p.team === 'blue' ? 'rgba(56, 189, 248, 0.25)' : 'rgba(244, 63, 94, 0.25)';
+          ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = 'bold 10px "Noto Sans KR"';
+          ctx.textAlign = 'center';
+          ctx.fillText('🌀 포탈', p.x, p.y + 3);
+          ctx.restore();
+        });
+
+        // 5. 체력의 유물
+        relics.forEach(r => {
+          if (!r.active) {
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+            ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.stroke();
+            return;
+          }
+          ctx.save();
+          ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
+          ctx.strokeStyle = '#4ade80';
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = '#4ade80'; ctx.shadowBlur = 12;
+          ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('✚', r.x, r.y + 5);
+          ctx.restore();
+        });
+
+        // 6. 넥서스 & 포탑
+        structures.forEach(s => {
+          if (s.hp <= 0) {
+            ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.radius * 0.7, 0, Math.PI * 2); ctx.fill();
+            return;
+          }
+          const col = s.team === 'blue' ? '#38bdf8' : '#f43f5e';
+          if (s.type === 'turret') {
+            // 포탑 사거리 가이드
+            ctx.strokeStyle = s.team === 'blue' ? 'rgba(56, 189, 248, 0.14)' : 'rgba(244, 63, 94, 0.14)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.arc(s.x, s.y, s.range, 0, Math.PI * 2); ctx.stroke();
+          }
+
+          ctx.save();
+          ctx.shadowColor = col; ctx.shadowBlur = s.type === 'nexus' ? 22 : 12;
+          ctx.fillStyle = s.team === 'blue' ? '#0284c7' : '#be123c';
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          if (s.type === 'nexus') {
+            for (let k = 0; k < 6; k++) {
+              const a = (k * Math.PI) / 3 + matchTime * 0.4;
+              const px = s.x + Math.cos(a) * s.radius;
+              const py = s.y + Math.sin(a) * s.radius;
+              if (k === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+          } else {
+            ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+          }
+          ctx.fill(); ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#ffffff';
+          ctx.font = s.type === 'nexus' ? 'bold 18px sans-serif' : 'bold 14px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(s.type === 'nexus' ? '💎' : '🗼', s.x, s.y + 6);
+          ctx.restore();
+
+          // 구조물 체력바
+          const bw = s.type === 'nexus' ? 76 : 52;
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw, 7);
+          ctx.fillStyle = col;
+          ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw * (s.hp / s.maxHp), 7);
+        });
+
+        // 7. 미니언
+        minions.forEach(m => {
+          const col = m.team === 'blue' ? '#60a5fa' : '#fb7185';
+          ctx.fillStyle = col;
+          ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+          // 미니언 HP 바
+          const bw = m.radius * 2;
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 8, bw, 4);
+          ctx.fillStyle = col;
+          ctx.fillRect(m.x - bw / 2, m.y - m.radius - 8, bw * (m.hp / m.maxHp), 4);
+        });
+
+        // 8. 챔피언 렌더링
+        [myHero, enemyHero].forEach(h => {
+          if (!h || h.dead) return;
+          const c = CHAMPIONS[h.champId];
+          const teamCol = h.team === 'blue' ? '#38bdf8' : '#f43f5e';
+          ctx.save();
+          if (h.inBush) ctx.globalAlpha = 0.55;
+
+          // 이동 목적지 마커
+          if (h === myHero && h.targetX !== null) {
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(h.targetX, h.targetY, 8, 0, Math.PI * 2); ctx.stroke();
+          }
+
+          // VIP 오오라 또는 보호막
+          if (h.shield > 0) {
+            ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(h.x, h.y, h.radius + 6, 0, Math.PI * 2); ctx.stroke();
+          }
+
+          ctx.shadowColor = teamCol; ctx.shadowBlur = 16;
+          ctx.fillStyle = h.team === 'blue' ? '#0369a1' : '#9f1239';
+          ctx.strokeStyle = teamCol; ctx.lineWidth = 3.5;
+          ctx.beginPath(); ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          ctx.font = '20px sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(c.icon, h.x, h.y + 1);
+
+          // 이름표 & 체력바
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = 'bold 11px "Noto Sans KR"';
+          ctx.fillText(`Lv.${h.level} ${h.name}`, h.x, h.y - h.radius - 20);
+
+          const bw = 60;
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(h.x - bw / 2, h.y - h.radius - 12, bw, 7);
+          ctx.fillStyle = h.team === 'blue' ? '#22c55e' : '#ef4444';
+          ctx.fillRect(h.x - bw / 2, h.y - h.radius - 12, bw * (h.hp / h.maxHp), 7);
+          if (h.stunTimer > 0) {
+            ctx.fillStyle = '#fde047';
+            ctx.font = 'bold 12px "Noto Sans KR"';
+            ctx.fillText('⚡기절', h.x, h.y - h.radius - 34);
+          }
+          ctx.restore();
+        });
+
+        // 9. 투사체 & VFX & 플로팅 텍스트
+        projectiles.forEach(pr => {
+          ctx.save();
+          ctx.fillStyle = pr.color;
+          ctx.shadowColor = pr.color; ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+        });
+
+        for (let i = vfxList.length - 1; i >= 0; i--) {
+          const v = vfxList[i];
+          v.life -= 0.016;
+          if (v.life <= 0) { vfxList.splice(i, 1); continue; }
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, v.life * 2);
+          ctx.strokeStyle = v.color;
+          ctx.lineWidth = 3.5;
+          if (v.type === 'ring') {
+            v.r += (v.maxR - v.r) * 0.2;
+            ctx.beginPath(); ctx.arc(v.x, v.y, v.r, 0, Math.PI * 2); ctx.stroke();
+          } else if (v.type === 'slash') {
+            ctx.beginPath(); ctx.arc(v.x, v.y, v.r * 0.8, v.angle - 0.8, v.angle + 0.8); ctx.stroke();
+          } else if (v.type === 'ultSword') {
+            ctx.fillStyle = v.color;
+            ctx.fillRect(v.x - 10, v.y - 120 * v.life, 20, 120 * v.life);
+            ctx.beginPath(); ctx.arc(v.x, v.y, 120 * (1 - v.life * 0.5), 0, Math.PI * 2); ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+          const ft = floatingTexts[i];
+          ft.y -= 28 * 0.016;
+          ft.life -= 0.016;
+          if (ft.life <= 0) { floatingTexts.splice(i, 1); continue; }
+          ctx.save();
+          ctx.globalAlpha = Math.min(1, ft.life * 1.5);
+          ctx.font = 'bold 12px "Noto Sans KR"';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = ft.color;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+
+        // 10. 칼바람 눈송이 파티클
+        ctx.fillStyle = 'rgba(224, 242, 254, 0.55)';
+        snowParticles.forEach(sp => {
+          sp.x += sp.vx * 0.016;
+          sp.y += sp.vy * 0.016;
+          if (sp.x < 0) sp.x = WORLD_W;
+          if (sp.y > WORLD_H) sp.y = 0;
+          ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r, 0, Math.PI * 2); ctx.fill();
+        });
+      }
+
+      function updateInGameHud() {
+        if (!myHero) return;
+        document.getElementById('hudBlueScore').textContent = `🔵 ${teamKills.blue}`;
+        document.getElementById('hudRedScore').textContent = `${teamKills.red} 🔴`;
+        const mins = String(Math.floor(matchTime / 60)).padStart(2, '0');
+        const secs = String(Math.floor(matchTime % 60)).padStart(2, '0');
+        document.getElementById('hudTimer').textContent = `${mins}:${secs}`;
+
+        const bNex = structures.find(s => s.id === 'blue_nexus');
+        const rNex = structures.find(s => s.id === 'red_nexus');
+        if (bNex) document.getElementById('hudBlueNexus').textContent = `블루 넥서스 ${Math.round(bNex.hp)}`;
+        if (rNex) document.getElementById('hudRedNexus').textContent = `레드 넥서스 ${Math.round(rNex.hp)}`;
+
+        document.getElementById('hudLevel').textContent = myHero.level;
+        document.getElementById('hudKdaText').textContent = `${myHero.kills}/${myHero.deaths} · CS ${myHero.cs}`;
+        document.getElementById('hudHpBar').style.width = `${Math.max(0, (myHero.hp / myHero.maxHp) * 100)}%`;
+        document.getElementById('hudHpText').textContent = `${Math.round(myHero.hp)} / ${myHero.maxHp}`;
+        document.getElementById('hudMpBar').style.width = `${Math.max(0, (myHero.mp / myHero.maxMp) * 100)}%`;
+        document.getElementById('hudGoldText').textContent = `🪙 ${Math.floor(myHero.gold)} G`;
+        document.getElementById('hudStatsText').textContent = `공격 ${myHero.ad} · 이속 ${Math.round(myHero.speed)}`;
+        document.getElementById('headerGoldDisplay').textContent = Math.floor(myHero.gold);
+
+        ['Q', 'W', 'E', 'R', 'D'].forEach(k => {
+          const el = document.getElementById('cd' + k);
+          if (myHero.cds[k] > 0) {
+            el.classList.remove('hidden'); el.classList.add('flex');
+            el.textContent = Math.ceil(myHero.cds[k]);
+          } else {
+            el.classList.add('hidden'); el.classList.remove('flex');
+          }
+        });
+      }
+
+      function aramLoop(ts) {
+        if (!gameRunning) return;
+        const dt = lastFrameTime ? Math.min(0.05, (ts - lastFrameTime) / 1000) : 0.016;
+        lastFrameTime = ts;
+
+        if (!matchPaused) {
+          const isHost = gameModeActive === 'practice' || pvpRole === 'left';
+          matchTime += dt;
+          if (isHost) {
+            waveTimer -= dt;
+            if (waveTimer <= 0) {
+              waveTimer = 13.0;
+              spawnMinionWave();
+            }
+            updateHero(myHero, dt);
+            if (gameModeActive === 'practice') updateAiHero(enemyHero, myHero, dt);
+            updateHero(enemyHero, dt);
+            updateMinionsAndStructures(dt);
+
+            if (gameModeActive === 'pvp' && pvpRoomName && ts - lastSyncTime > 45) {
+              lastSyncTime = ts;
+              socket.emit('sync_game_state', {
+                room: pvpRoomName, role: pvpRole, hostState: true,
+                matchTime, teamKills,
+                structures: structures.map(s => ({ hp: s.hp })),
+                minions: minions.slice(0, 40),
+                projectiles: projectiles.slice(0, 30).map(p => ({ x: p.x, y: p.y, radius: p.radius, color: p.color })),
+                blueHero: { x: myHero.x, y: myHero.y, hp: myHero.hp, mp: myHero.mp, level: myHero.level, dead: myHero.dead },
+                redHero: { x: enemyHero.x, y: enemyHero.y, hp: enemyHero.hp, mp: enemyHero.mp, level: enemyHero.level, dead: enemyHero.dead }
+              });
+            }
+          } else {
+            updateHero(myHero, dt);
+            if (pvpRoomName && ts - lastSyncTime > 50) {
+              lastSyncTime = ts;
+              socket.emit('sync_game_state', { room: pvpRoomName, role: pvpRole, clientInput: true, tx: myHero.x, ty: myHero.y });
+            }
+          }
+        }
+
+        ctx.clearRect(0, 0, viewW, viewH);
+        const scale = Math.min(viewW / WORLD_W, viewH / WORLD_H);
+        const ox = (viewW - WORLD_W * scale) / 2;
+        const oy = (viewH - WORLD_H * scale) / 2;
+        ctx.save();
+        ctx.translate(ox, oy);
+        ctx.scale(scale, scale);
+        drawHowlingAbyss();
+        ctx.restore();
+
+        updateInGameHud();
+        requestAnimationFrame(aramLoop);
+      }
+
+      // ==========================================
+      // 8. 입력 & 상점 & UI 이벤트 바인딩
+      // ==========================================
+      function screenToWorld(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scale = Math.min(viewW / WORLD_W, viewH / WORLD_H);
+        const ox = (viewW - WORLD_W * scale) / 2;
+        const oy = (viewH - WORLD_H * scale) / 2;
+        return {
+          x: (clientX - rect.left - ox) / scale,
+          y: (clientY - rect.top - oy) / scale
+        };
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (!gameRunning || matchPaused || !myHero || myHero.dead) return;
+        getAudioContext();
+        const pt = screenToWorld(e.clientX, e.clientY);
+        mouseWorld = pt;
+        myHero.targetX = pt.x;
+        myHero.targetY = pt.y;
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        if (!gameRunning) return;
+        mouseWorld = screenToWorld(e.clientX, e.clientY);
+      });
+
+      // 모바일 터치 조이스틱
+      const joyZone = document.getElementById('touchJoystickZone');
+      const joyKnob = document.getElementById('touchJoystickKnob');
+      let joyActive = false;
+      joyZone.addEventListener('pointerdown', (e) => { e.stopPropagation(); joyActive = true; });
+      window.addEventListener('pointermove', (e) => {
+        if (!joyActive) return;
+        const rect = joyZone.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = e.clientX - cx;
+        const dy = e.clientY - cy;
+        const maxR = rect.width / 2 - 12;
+        const dist = Math.hypot(dx, dy);
+        const clamped = Math.min(dist, maxR);
+        const ang = Math.atan2(dy, dx);
+        joyKnob.style.transform = `translate(${Math.cos(ang) * clamped}px, ${Math.sin(ang) * clamped}px)`;
+        joyVec = { x: (Math.cos(ang) * clamped) / maxR, y: (Math.sin(ang) * clamped) / maxR };
+      });
+      window.addEventListener('pointerup', () => {
+        if (!joyActive) return;
+        joyActive = false;
+        joyKnob.style.transform = 'translate(0px, 0px)';
+        joyVec = { x: 0, y: 0 };
+      });
+
+      window.addEventListener('keydown', (e) => {
+        keysPressed[e.code] = true;
+        if (!gameRunning || matchPaused || !myHero) return;
+        if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+        if (e.code === 'Space') performHeroAttack(myHero);
+        else if (e.code === 'KeyQ') castHeroSkill(myHero, 'Q', mouseWorld.x, mouseWorld.y);
+        else if (e.code === 'KeyW') castHeroSkill(myHero, 'W', mouseWorld.x, mouseWorld.y);
+        else if (e.code === 'KeyE') castHeroSkill(myHero, 'E', mouseWorld.x, mouseWorld.y);
+        else if (e.code === 'KeyR') castHeroSkill(myHero, 'R', mouseWorld.x, mouseWorld.y);
+        else if (e.code === 'KeyF') castHeroSkill(myHero, 'D', mouseWorld.x, mouseWorld.y);
+        else if (e.code === 'KeyB') toggleShop();
+      });
+      window.addEventListener('keyup', (e) => { keysPressed[e.code] = false; });
+
+      document.getElementById('btnAtk').addEventListener('click', () => { if (myHero) performHeroAttack(myHero); });
+      ['Q', 'W', 'E', 'R', 'D'].forEach(k => {
+        document.getElementById('btn' + k).addEventListener('click', () => {
+          if (myHero) castHeroSkill(myHero, k, mouseWorld.x, mouseWorld.y);
+        });
+      });
+
+      function renderShopItems() {
+        const grid = document.getElementById('shopItemsGrid');
+        document.getElementById('shopGoldText').textContent = `${Math.floor(myHero ? myHero.gold : 0)} G`;
+        grid.innerHTML = '';
+        SHOP_ITEMS.forEach(item => {
+          const owned = myHero && myHero.items.includes(item.id);
+          const canBuy = myHero && !owned && myHero.gold >= item.cost;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `p-2.5 rounded-xl border text-left transition flex items-center justify-between gap-2 ${
+            owned ? 'bg-emerald-950/30 border-emerald-500/50 opacity-75' : canBuy ? 'bg-slate-950 hover:bg-slate-800 border-amber-500/60 cursor-pointer' : 'bg-slate-950/60 border-slate-800 opacity-60'
+          }`;
+          btn.innerHTML = `
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-xl">${item.icon}</span>
+              <div class="min-w-0">
+                <div class="text-xs font-black text-slate-100 truncate">${item.name}</div>
+                <div class="text-[10px] text-slate-400 truncate">${item.desc}</div>
+              </div>
+            </div>
+            <span class="shrink-0 text-[11px] font-black ${owned ? 'text-emerald-300' : 'text-amber-300'}">${owned ? '보유' : item.cost + 'G'}</span>
+          `;
+          btn.addEventListener('click', () => {
+            if (!myHero || owned) return;
+            if (myHero.gold < item.cost) { showToast(`골드가 부족합니다! (${item.cost} G 필요)`); return; }
+            myHero.gold -= item.cost;
+            myHero.items.push(item.id);
+            myHero.maxHp += item.hp; myHero.hp += item.hp;
+            myHero.ad += item.ad;
+            myHero.speed += item.spd;
+            myHero.atkCd = Math.max(0.28, myHero.atkCd * (1 - item.aspd));
+            if (item.id === 'warmog') myHero.warmogRegen = true;
+            playSfx('gold');
+            renderShopItems();
+            updateInGameHud();
+            showToast(`🛒 [${item.name}] 구매 완료!`);
+          });
+          grid.appendChild(btn);
+        });
+      }
+
+      function toggleShop() {
+        const so = document.getElementById('shopOverlay');
+        if (so.classList.contains('hidden')) {
+          renderShopItems();
+          so.classList.remove('hidden'); so.classList.add('flex');
+        } else {
+          so.classList.add('hidden'); so.classList.remove('flex');
+        }
+      }
+      document.getElementById('shopOpenBtn').addEventListener('click', toggleShop);
+      document.getElementById('shopCloseBtn').addEventListener('click', toggleShop);
+
+      // 모드 전환 & 대기실 버튼
+      function switchToPracticeSelect() {
+        gameRunning = false;
+        currentMode = 'practice';
+        document.getElementById('modePracticeTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-sky-600 text-white shadow cursor-pointer';
+        document.getElementById('modePvPTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
+        document.getElementById('gameAreaSection').classList.add('hidden');
+        document.getElementById('pvpLobbySection').classList.add('hidden');
+        document.getElementById('pvpLobbySection').classList.remove('flex');
+        document.getElementById('practiceSelectSection').classList.remove('hidden');
+      }
+
+      function switchToPvpLobby() {
+        gameRunning = false;
+        currentMode = 'pvp';
+        document.getElementById('modePracticeTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
+        document.getElementById('modePvPTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-blue-600 text-white shadow cursor-pointer';
+        document.getElementById('gameAreaSection').classList.add('hidden');
+        document.getElementById('practiceSelectSection').classList.add('hidden');
+        document.getElementById('pvpLobbySection').classList.remove('hidden');
+        document.getElementById('pvpLobbySection').classList.add('flex');
+        renderWaitingList([{ username: getDisplayName(), socketId: socket.id }]);
+        socket.emit('enter_pvp_lobby', { username: getDisplayName() });
+        loadPvpRanking();
+      }
+
+      document.getElementById('modePracticeTab').addEventListener('click', switchToPracticeSelect);
+      document.getElementById('modePvPTab').addEventListener('click', switchToPvpLobby);
+      document.getElementById('practiceStartBtn').addEventListener('click', () => {
+        getAudioContext();
+        startAramMatch('practice');
+      });
+      document.getElementById('backToSelectBtn').addEventListener('click', () => {
+        if (currentMode === 'pvp' && pvpRoomName) socket.emit('pvp_forfeit', { room: pvpRoomName, role: pvpRole });
+        currentMode === 'pvp' ? switchToPvpLobby() : switchToPracticeSelect();
+      });
+      document.getElementById('rematchBtn').addEventListener('click', () => startAramMatch(gameModeActive));
+      document.getElementById('resultLobbyBtn').addEventListener('click', () => {
+        currentMode === 'pvp' ? switchToPvpLobby() : switchToPracticeSelect();
+      });
+
+      document.getElementById('joinLeftBtn').addEventListener('click', () => {
+        const ch = CHAMPIONS[state.selectedChamp];
+        const tagged = `${getDisplayName()} [${ch.name}]`;
+        renderLobbySlots([...lastLobbyPlayers.filter(p => p.socketId !== socket.id), { socketId: socket.id, username: tagged, slot: 'left', skinId: ch.id }]);
+        socket.emit('join_pvp_lobby', { username: tagged, slot: 'left', skinId: ch.id });
+      });
+      document.getElementById('joinRightBtn').addEventListener('click', () => {
+        const ch = CHAMPIONS[state.selectedChamp];
+        const tagged = `${getDisplayName()} [${ch.name}]`;
+        renderLobbySlots([...lastLobbyPlayers.filter(p => p.socketId !== socket.id), { socketId: socket.id, username: tagged, slot: 'right', skinId: ch.id }]);
+        socket.emit('join_pvp_lobby', { username: tagged, slot: 'right', skinId: ch.id });
+      });
+      function cancelWait() {
+        socket.emit('leave_pvp_lobby');
+        renderLobbySlots(lastLobbyPlayers.filter(p => p.socketId !== socket.id));
+        showToast('대기를 취소했습니다.');
+      }
+      document.getElementById('cancelLeftBtn').addEventListener('click', cancelWait);
+      document.getElementById('cancelRightBtn').addEventListener('click', cancelWait);
+      document.getElementById('pvpStartMatchBtn').addEventListener('click', () => socket.emit('start_pvp_match'));
+
+      // ==========================================
+      // 9. 클라우드 인증 / 랭킹 / VIP / 바로가기 / 토스트
+      // ==========================================
+      let toastTimeout = null;
+      function showToast(msg) {
+        const b = document.getElementById('toastBox');
+        document.getElementById('toastMsg').textContent = msg;
+        b.classList.remove('opacity-0', 'translate-y-2');
+        b.classList.add('opacity-100', 'translate-y-0');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+          b.classList.remove('opacity-100', 'translate-y-0');
+          b.classList.add('opacity-0', 'translate-y-2');
+        }, 2300);
+      }
+
+      async function syncSaveToServer(notify) {
+        if (!authToken) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/save`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+            body: JSON.stringify({ gameId: GAME_ID, saveData: state, score: state.wins })
+          });
+          if (res.ok && notify) showToast('🟨 클라우드 서버에 전적이 저장되었습니다!');
+        } catch (e) {}
+      }
+
+      async function loadPvpRanking() {
+        const listEl = document.getElementById('pvpRankingList');
+        if (!listEl) return;
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/ranking?gameId=${GAME_ID}`);
+          if (res.ok) {
+            const data = await res.json();
+            const arr = (data.rankings || []).slice(0, 10);
+            if (arr.length > 0) {
+              listEl.innerHTML = arr.map((r, i) => `
+                <div class="flex justify-between px-2.5 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-slate-300">
+                  <span>${i + 1}위 ${r.maskedName || r.username}</span>
+                  <span class="text-amber-300 font-extrabold">${r.score || 0}승</span>
+                </div>
+              `).join('');
+              return;
+            }
+          }
+        } catch (e) {}
+        listEl.innerHTML = '<div class="text-slate-500 py-2 text-center">등록된 대전 기록이 없습니다.</div>';
+      }
+      document.getElementById('pvpRankingRefreshBtn').addEventListener('click', loadPvpRanking);
+
+      function updateAuthUI() {
+        const badge = document.getElementById('userBadge');
+        const lbl = document.getElementById('serverSaveBtnLabel');
+        const outBtn = document.getElementById('logoutBtn');
+        if (authToken && currentUsername) {
+          badge.textContent = `📱 ${currentUsername}`;
+          lbl.textContent = '서버저장';
+          outBtn.classList.remove('hidden');
+        } else {
+          badge.textContent = '👤 게스트';
+          lbl.textContent = '로그인';
+          outBtn.classList.add('hidden');
+        }
+        document.getElementById('vipHeaderBtnLabel').textContent = state.isVip ? 'VIP 적용중' : 'VIP';
+      }
+
+      const authModal = document.getElementById('authModal');
+      let isRegisterMode = false;
+      document.getElementById('serverSaveGoldBtn').addEventListener('click', () => {
+        if (authToken) syncSaveToServer(true);
+        else { authModal.classList.remove('hidden'); authModal.classList.add('flex'); }
+      });
+      document.getElementById('authCloseBtn').addEventListener('click', () => { authModal.classList.add('hidden'); authModal.classList.remove('flex'); });
+      document.getElementById('modeLoginBtn').addEventListener('click', () => { isRegisterMode = false; });
+      document.getElementById('modeRegisterBtn').addEventListener('click', () => { isRegisterMode = true; });
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        authToken = null; currentUsername = null;
+        try { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); } catch (e) {}
+        updateAuthUI(); showToast('로그아웃되었습니다.');
+      });
+      document.getElementById('authForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const digits = document.getElementById('authPhoneDigits').value.replace(/\D/g, '');
+        const pin = document.getElementById('authPinCode').value.trim();
+        const fullId = `010-${digits.slice(0, 4)}-${digits.slice(4)}`;
+        try {
+          const res = await fetch(`${API_BASE_URL}${isRegisterMode ? '/api/register' : '/api/login'}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: fullId, password: pin, gameId: GAME_ID, initialSaveData: state })
+          });
+          const data = await res.json();
+          if (res.ok && data.token) {
+            authToken = data.token; currentUsername = data.username;
+            try { localStorage.setItem(TOKEN_KEY, authToken); localStorage.setItem(USER_KEY, currentUsername); } catch (e) {}
+            if (data.isVip) state.isVip = true;
+            saveState(false); updateAuthUI();
+            authModal.classList.add('hidden'); authModal.classList.remove('flex');
+            showToast(`🟨 [${currentUsername}] 로그인 완료!`);
+          } else {
+            document.getElementById('authErrorMsg').textContent = data.error || '로그인 실패';
+            document.getElementById('authErrorMsg').classList.remove('hidden');
+          }
+        } catch (err) {
+          document.getElementById('authErrorMsg').textContent = '서버와 연결할 수 없습니다.';
+          document.getElementById('authErrorMsg').classList.remove('hidden');
+        }
+      });
+
+      // VIP & 초기화 & 사운드 토글 & 바로가기
+      const vipModal = document.getElementById('vipModal');
+      document.getElementById('vipOpenBtn').addEventListener('click', () => { vipModal.classList.remove('hidden'); vipModal.classList.add('flex'); });
+      document.getElementById('vipCloseBtn').addEventListener('click', () => { vipModal.classList.add('hidden'); vipModal.classList.remove('flex'); });
+
+      const resetModal = document.getElementById('resetModal');
+      document.getElementById('resetOpenBtn').addEventListener('click', () => { resetModal.classList.remove('hidden'); resetModal.classList.add('flex'); });
+      document.getElementById('resetCancelBtn').addEventListener('click', () => { resetModal.classList.add('hidden'); resetModal.classList.remove('flex'); });
+      document.getElementById('resetConfirmBtn').addEventListener('click', () => {
+        resetModal.classList.add('hidden'); resetModal.classList.remove('flex');
+        switchToPracticeSelect();
+        showToast('🔄 챔피언 선택 화면으로 초기화되었습니다.');
+      });
+
+      document.getElementById('bgmToggleBtn').addEventListener('click', () => {
+        state.bgmEnabled = !state.bgmEnabled;
+        saveState(false);
+        document.getElementById('bgmToggleBtn').textContent = state.bgmEnabled ? '🎵 배경음 ON' : '🔇 배경음 OFF';
+        if (state.bgmEnabled) startBGM(); else stopBGM();
+      });
+      document.getElementById('soundToggleBtn').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        saveState(false);
+        document.getElementById('soundToggleBtn').textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+      });
+      document.getElementById('androidInstallBtn').addEventListener('click', () => {
+        showToast('📲 브라우저 메뉴에서 [홈 화면에 추가]를 누르면 바탕화면에 설치됩니다.');
+      });
+
+      // 부팅
+      window.addEventListener('load', () => {
+        initSocket();
+        updateAuthUI();
+        updateSelectionUI();
+      });
+    })();
+  </script>
+</body>
+</html>
