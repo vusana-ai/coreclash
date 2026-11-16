@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0f172a" />
+  <link rel="manifest" href="./manifest.json" />
   <title>칼바람 — 리그 오브 레전드 스타일</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
@@ -1291,7 +1292,7 @@
           combatTimer: 0, warmogRegen: false,
           flashTimer: 0, portalCd: 0, dashTimer: 0, dashVx: 0, dashVy: 0,
           cds: { Q: 0, W: 0, E: 0, R: 0, D: 0 },
-          inBush: false, revealTimer: 0
+          inBush: false, revealTimer: 0, aiRetreating: false
         };
       }
 
@@ -1730,13 +1731,21 @@
       // ==========================================
       function updateAiHero(ai, opp, dt) {
         if (!ai || ai.dead || ai.stunTimer > 0) return;
-        const safeX = ai.team === 'red' ? WORLD_W - 220 : 220;
+        const ownNexus = structures.find(s => s.type === 'nexus' && s.team === ai.team);
+        const nexusX = ownNexus ? ownNexus.x : (ai.team === 'red' ? WORLD_W - 105 : 105);
+        const nexusY = ownNexus ? ownNexus.y : 280;
 
-        // 체력이 28% 미만이면 후퇴
-        if (ai.hp / ai.maxHp < 0.28) {
-          ai.targetX = safeX;
-          ai.targetY = 280;
-          if (ai.cds.W <= 0) castHeroSkill(ai, 'W', opp.x, opp.y);
+        // 체력이 32% 미만이면 넥서스로 후퇴, 90% 이상 회복될 때까지 넥서스 위에서 대기 후 재출격
+        if (ai.hp / ai.maxHp < 0.32) {
+          ai.aiRetreating = true;
+        } else if (ai.aiRetreating && ai.hp / ai.maxHp >= 0.90) {
+          ai.aiRetreating = false;
+        }
+
+        if (ai.aiRetreating) {
+          ai.targetX = nexusX;
+          ai.targetY = nexusY;
+          if (ai.cds.W <= 0 && Math.hypot(opp.x - ai.x, opp.y - ai.y) < 350) castHeroSkill(ai, 'W', opp.x, opp.y);
           return;
         }
 
@@ -2709,8 +2718,37 @@
         saveState(false);
         document.getElementById('soundToggleBtn').textContent = state.soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
       });
-      document.getElementById('androidInstallBtn').addEventListener('click', () => {
-        showToast('📲 브라우저 메뉴에서 [홈 화면에 추가]를 누르면 바탕화면에 설치됩니다.');
+      let deferredInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+      });
+      if ('serviceWorker' in navigator && location.protocol === 'https:') {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+      document.getElementById('androidInstallBtn').addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          if (choice && choice.outcome === 'accepted') {
+            document.getElementById('androidInstallBtnText').textContent = '설치 완료';
+            showToast('✅ 바탕화면 바로가기 설치 완료!');
+          }
+          return;
+        }
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          showToast('📲 브라우저 메뉴(⋮ 또는 공유) → [홈 화면에 추가]를 눌러주세요!');
+        } else {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob(['[InternetShortcut]\r\nURL=' + location.href + '\r\n'], { type: 'text/plain' }));
+          a.download = '칼바람아레나.url';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+          document.getElementById('androidInstallBtnText').textContent = '완료';
+          showToast('🖥️ 바탕화면 바로가기(.url) 파일이 다운로드되었습니다!');
+        }
       });
 
       // 부팅
