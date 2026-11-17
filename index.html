@@ -273,9 +273,9 @@
         </div>
       </div>
 
-      <!-- 메인 칼바람 나락 캔버스 (내부에 가리는 UI 없이 전장만 온전히 표시) -->
+      <!-- 메인 칼바람 나락 캔버스 (가리는 UI 없이 전장만 온전히 표시) -->
       <div class="relative bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
-        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[2/1] min-h-[240px] max-h-[520px] bg-slate-950">
+        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[2/1] min-h-[240px] max-h-[520px] bg-black">
           <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
 
           <!-- 3-2-1 카운트다운 -->
@@ -303,7 +303,7 @@
             </div>
           </div>
 
-          <!-- 상점 팝업 (게임 내 B키 또는 상점 버튼) -->
+          <!-- 상점 팝업 -->
           <div id="shopOverlay" class="hidden absolute inset-0 z-20 items-center justify-center bg-black/70 backdrop-blur-sm p-3">
             <div class="bg-slate-900 border-2 border-amber-500/50 rounded-2xl max-w-md w-full p-4 shadow-2xl">
               <div class="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
@@ -322,97 +322,112 @@
         </div>
       </div>
 
-      <!-- LoL 스타일 하단 챔피언 HUD + 모바일 전용 좌측 외부 조이스틱 -->
-      <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <!-- 좌측: 모바일 조이스틱(게임 화면 바깥 좌측 하단) + 내 챔피언 상태 -->
-        <div class="flex items-center gap-3 min-w-0">
-          <!-- 모바일 전용 가상 조이스틱 (캔버스 밖 하단 왼쪽에 독립 배치되어 게임 화면을 가리지 않음) -->
-          <div id="touchJoystickZone" class="sm:hidden relative w-24 h-24 rounded-full bg-slate-950/90 border-2 border-sky-500/45 shadow-inner shrink-0 flex items-center justify-center touch-none">
-            <div class="absolute inset-2 rounded-full border border-dashed border-slate-700/80 pointer-events-none"></div>
-            <div id="touchJoystickKnob" class="w-10 h-10 rounded-full bg-gradient-to-b from-sky-400 to-blue-600 border-2 border-white/80 shadow-lg pointer-events-none flex items-center justify-center text-[10px] font-black text-white">✥</div>
+      <!-- ============================================================== -->
+      <!-- LoL 스타일 하단 조작 패널 (시안 배치: 좌측 조이스틱 / 우측 상단 F·공격 / 우측 하단 Q·W·E·R) -->
+      <!-- ============================================================== -->
+      <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 shadow-xl flex flex-col gap-3">
+        <!-- 상단 컨트롤 영역: 좌측 조이스틱 + 우측 2줄 스킬/공격 버튼 -->
+        <div class="flex items-center justify-between gap-2.5 sm:gap-4">
+          <!-- 좌측: 모바일 가상 조이스틱 (PC에서는 챔피언 초상화 표시) -->
+          <div class="flex items-center gap-3 shrink-0">
+            <div id="touchJoystickZone" class="sm:hidden relative w-24 h-24 rounded-full bg-slate-950/95 border-2 border-sky-500/45 shadow-inner shrink-0 flex items-center justify-center touch-none">
+              <div class="absolute inset-2.5 rounded-full border border-dashed border-slate-700/80 pointer-events-none"></div>
+              <div id="touchJoystickKnob" class="w-10 h-10 rounded-full bg-gradient-to-b from-sky-400 to-blue-600 border-2 border-white/85 shadow-lg pointer-events-none flex items-center justify-center text-[10px] font-black text-white">✥</div>
+            </div>
+
+            <!-- 데스크톱 전용 챔피언 초상화 -->
+            <div class="hidden sm:flex items-center gap-2.5">
+              <div class="relative shrink-0">
+                <div id="hudPortrait" class="w-14 h-14 rounded-xl bg-slate-800 border-2 border-sky-400 flex items-center justify-center text-2xl shadow-inner">⚔️</div>
+                <span id="hudLevel" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border border-slate-900">1</span>
+              </div>
+            </div>
           </div>
 
-          <div class="flex-1 flex items-center gap-2.5 min-w-0">
-            <div class="relative shrink-0">
-              <div id="hudPortrait" class="w-12 h-12 rounded-xl bg-slate-800 border-2 border-sky-400 flex items-center justify-center text-2xl shadow-inner">⚔️</div>
-              <span id="hudLevel" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border border-slate-900">1</span>
+          <!-- 우측: 1줄 [F 점멸] [SPC 공격] (우측 정렬) / 2줄 [Q] [W] [E] [R] (조이스틱 오른쪽 하단 일렬 배치) -->
+          <div class="flex-1 flex flex-col items-end gap-1.5 min-w-0">
+            <!-- 1줄: 점멸(F) + 공격(SPC) -->
+            <div class="flex items-center justify-end gap-1.5 sm:gap-2">
+              <button id="btnD" type="button" class="relative w-12 h-11 sm:w-14 sm:h-12 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-yellow-400/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+                <span class="text-sm sm:text-base">✨</span>
+                <span class="text-[9px] font-extrabold text-yellow-200 leading-tight">점멸</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">F</span>
+                <div id="cdD" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnAtk" type="button" class="relative w-12 h-11 sm:w-14 sm:h-12 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-amber-400/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer">
+                <span class="text-sm sm:text-base">⚔️</span>
+                <span class="text-[9px] font-black text-amber-300 leading-tight">공격</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-bold text-slate-400">SPC</span>
+              </button>
             </div>
-            <div class="flex-1 min-w-0 sm:w-48">
-              <div class="flex items-center justify-between text-xs font-extrabold">
-                <span id="hudChampName" class="text-sky-300 truncate">카렌 (기사)</span>
-                <span id="hudKdaText" class="text-[11px] text-slate-300 tabular-nums">0/0 · CS 0</span>
-              </div>
-              <!-- HP Bar -->
-              <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
-                <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
-                <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white drop-shadow">1250 / 1250</span>
-              </div>
-              <!-- MP Bar -->
-              <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
-                <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
-              </div>
+
+            <!-- 2줄: Q / W / E / R 스킬 4개 나란히 -->
+            <div class="grid grid-cols-4 gap-1.5 sm:gap-2 w-full max-w-[232px] sm:max-w-[264px]">
+              <button id="btnQ" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+                <span id="iconQ" class="text-base sm:text-lg">🌀</span>
+                <span id="nameQ" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[92%]">회전베기</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">Q</span>
+                <div id="cdQ" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnW" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+                <span id="iconW" class="text-base sm:text-lg">🛡️</span>
+                <span id="nameW" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[92%]">결의</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">W</span>
+                <div id="cdW" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnE" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+                <span id="iconE" class="text-base sm:text-lg">💨</span>
+                <span id="nameE" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[92%]">돌진</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">E</span>
+                <div id="cdE" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnR" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-fuchsia-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
+                <span id="iconR" class="text-base sm:text-lg">⚡</span>
+                <span id="nameR" class="text-[9px] font-extrabold text-fuchsia-200 truncate max-w-[92%]">궁극기</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">R</span>
+                <div id="cdR" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- 중앙: Q / W / E / R + 기본공격(Space) + 점멸(D) 스킬바 -->
-        <div class="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap">
-          <button id="btnAtk" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-amber-400/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer">
-            <span class="text-base sm:text-lg">⚔️</span>
-            <span class="text-[9px] font-black text-amber-300">공격</span>
-            <span class="absolute top-0.5 left-1 text-[8px] font-bold text-slate-400">SPC</span>
-          </button>
-
-          <button id="btnQ" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-            <span id="iconQ" class="text-base sm:text-lg">🌀</span>
-            <span id="nameQ" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[90%]">회전베기</span>
-            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">Q</span>
-            <div id="cdQ" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-          </button>
-
-          <button id="btnW" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-            <span id="iconW" class="text-base sm:text-lg">🛡️</span>
-            <span id="nameW" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[90%]">결의</span>
-            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">W</span>
-            <div id="cdW" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-          </button>
-
-          <button id="btnE" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-            <span id="iconE" class="text-base sm:text-lg">💨</span>
-            <span id="nameE" class="text-[9px] font-extrabold text-sky-200 truncate max-w-[90%]">돌진</span>
-            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">E</span>
-            <div id="cdE" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-          </button>
-
-          <button id="btnR" type="button" class="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-fuchsia-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-            <span id="iconR" class="text-base sm:text-lg">⚡</span>
-            <span id="nameR" class="text-[9px] font-extrabold text-fuchsia-200 truncate max-w-[90%]">궁극기</span>
-            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">R</span>
-            <div id="cdR" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-          </button>
-
-          <button id="btnD" type="button" class="relative w-11 h-12 sm:w-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-yellow-400/70 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-            <span class="text-base">✨</span>
-            <span class="text-[9px] font-extrabold text-yellow-200">점멸</span>
-            <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">F</span>
-            <div id="cdD" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-          </button>
+        <!-- 중단: 챔피언 체력(HP) & 마나(MP) 상태 바 -->
+        <div class="bg-slate-950/75 border border-slate-800/90 rounded-xl px-3 py-2 flex flex-col gap-1">
+          <div class="flex items-center justify-between text-xs font-extrabold">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span id="hudLevelMobile" class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[10px]">Lv.1</span>
+              <span id="hudChampName" class="text-sky-300 truncate">카렌 (칼든 기사)</span>
+            </div>
+            <span id="hudKdaText" class="text-[11px] text-slate-300 tabular-nums shrink-0">0/0 · CS 0</span>
+          </div>
+          <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 relative">
+            <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
+            <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white drop-shadow">1280 / 1280</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+            <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
+          </div>
         </div>
 
-        <!-- 우측: 골드 & 상점 -->
-        <div class="flex items-center justify-between md:justify-end gap-2 shrink-0">
-          <div class="text-right">
-            <div class="text-xs font-black text-amber-300" id="hudGoldText">🪙 500 G</div>
-            <div class="text-[10px] text-slate-400" id="hudStatsText">공격 72 · 속도 100%</div>
+        <!-- 하단: 좌측 골드/스탯 · 우측 상점(B) 버튼 (시안 최하단과 동일) -->
+        <div class="flex items-center justify-between gap-2 pt-0.5">
+          <div>
+            <div class="text-sm font-black text-amber-300" id="hudGoldText">🪙 500 G</div>
+            <div class="text-[11px] text-slate-400 font-semibold" id="hudStatsText">공격 74 · 이속 225</div>
           </div>
-          <button id="shopOpenBtn" type="button" class="px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow transition cursor-pointer">
-            🛒 상점 (B)
+          <button id="shopOpenBtn" type="button" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition cursor-pointer flex items-center gap-1.5">
+            <span>🛒</span>
+            <span>상점 (B)</span>
           </button>
         </div>
       </div>
 
       <div class="text-center text-[11px] text-slate-400">
-        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">하단 조이스틱 / 화면 터치 이동</kbd> · 기본공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
+        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">좌측 조이스틱 / 화면 터치 이동</kbd> · 공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
       </div>
     </section>
 
@@ -1365,7 +1380,11 @@
 
       function setupHudForHero(h) {
         const c = CHAMPIONS[h.champId];
-        const hpEl = document.getElementById('hudPortrait'); if (CHAMPION_SVGS[c.id]) hpEl.innerHTML = CHAMPION_SVGS[c.id]; else hpEl.textContent = c.icon;
+        const hpEl = document.getElementById('hudPortrait');
+        if (hpEl) {
+          if (CHAMPION_SVGS[c.id]) hpEl.innerHTML = CHAMPION_SVGS[c.id];
+          else hpEl.textContent = c.icon;
+        }
         document.getElementById('hudChampName').textContent = `${c.name} (${c.title})`;
         ['Q', 'W', 'E', 'R'].forEach(k => {
           document.getElementById('icon' + k).textContent = c.skills[k].icon;
@@ -2224,7 +2243,11 @@
         if (bNex) document.getElementById('hudBlueNexus').textContent = `블루 넥서스 ${Math.round(bNex.hp)}`;
         if (rNex) document.getElementById('hudRedNexus').textContent = `레드 넥서스 ${Math.round(rNex.hp)}`;
 
-        document.getElementById('hudLevel').textContent = myHero.level;
+        const lvEl = document.getElementById('hudLevel');
+        if (lvEl) lvEl.textContent = myHero.level;
+        const lvMobEl = document.getElementById('hudLevelMobile');
+        if (lvMobEl) lvMobEl.textContent = `Lv.${myHero.level}`;
+
         document.getElementById('hudKdaText').textContent = `${myHero.kills}/${myHero.deaths} · CS ${myHero.cs}`;
         document.getElementById('hudHpBar').style.width = `${Math.max(0, (myHero.hp / myHero.maxHp) * 100)}%`;
         document.getElementById('hudHpText').textContent = `${Math.round(myHero.hp)} / ${myHero.maxHp}`;
@@ -2324,7 +2347,7 @@
         mouseWorld = screenToWorld(e.clientX, e.clientY);
       });
 
-      // 모바일 터치 가상 조이스틱 (캔버스 외부 좌측 하단 HUD 영역)
+      // 모바일 터치 가상 조이스틱
       const joyZone = document.getElementById('touchJoystickZone');
       const joyKnob = document.getElementById('touchJoystickKnob');
       let joyActive = false;
