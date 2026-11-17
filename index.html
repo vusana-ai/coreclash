@@ -43,10 +43,9 @@
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
-  <!-- Header (2단 깔끔 정렬 구조 - 참고 디자인 유지) -->
+  <!-- Header -->
   <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/25">
     <div class="max-w-5xl mx-auto flex flex-col gap-2">
-      <!-- 1단 -->
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-wrap">
           <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400/25 to-blue-600/25 text-sky-300 font-extrabold text-sm border border-sky-400/40 shadow-inner shrink-0">❄️</span>
@@ -79,7 +78,6 @@
         </div>
       </div>
 
-      <!-- 2단 -->
       <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/70">
         <p id="syncStatusText" class="text-[11px] text-slate-400 truncate">
           로그인 시 칼바람 대전 전적이 자동으로 기록됩니다
@@ -119,9 +117,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
     <!-- 화면 1-A: 연습 모드 챔피언 선택 & 대기 화면 -->
-    <!-- ========================================== -->
     <section id="practiceSelectSection" class="bg-slate-900/95 border-2 border-sky-500/40 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-4">
       <div class="flex items-center justify-between flex-wrap gap-2 border-b border-slate-800 pb-3">
         <div>
@@ -142,10 +138,8 @@
         </div>
       </div>
 
-      <!-- 3종 챔피언 카드 그리드 -->
       <div id="practiceChampGrid" class="grid grid-cols-1 md:grid-cols-3 gap-3"></div>
 
-      <!-- 선택 대기 상태바 & 게임 시작 버튼 -->
       <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <div id="practiceReadyDot" class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
@@ -165,9 +159,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- 화면 1-B: 대전 모드 실시간 대기실 (대결매칭구조 참고) -->
-    <!-- ========================================== -->
+    <!-- 화면 1-B: 대전 모드 실시간 대기실 -->
     <section id="pvpLobbySection" class="hidden bg-slate-900/95 border-2 border-blue-500/50 rounded-2xl p-4 shadow-2xl flex-col gap-3.5">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2.5 gap-2 flex-wrap">
         <div>
@@ -184,7 +176,6 @@
         </div>
       </div>
 
-      <!-- 실시간 대기자 명단 -->
       <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
         <div class="flex items-center justify-between mb-2">
           <span class="text-xs font-extrabold text-sky-300">👥 실시간 대기자 명단</span>
@@ -195,7 +186,6 @@
         </div>
       </div>
 
-      <!-- 대전 모드 챔피언 선택 UI -->
       <div class="bg-slate-950/90 border border-indigo-500/40 rounded-xl p-3">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[11px] font-black text-indigo-300">🛡️ 대전 참가 전 내 챔피언 선택</span>
@@ -204,7 +194,6 @@
         <div id="pvpChampSelectGrid" class="grid grid-cols-3 gap-2"></div>
       </div>
 
-      <!-- 좌우 참가석 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div id="slotLeft" class="bg-slate-950/80 border border-blue-500/30 rounded-xl p-3.5 flex flex-col items-center justify-center gap-3 text-center">
           <div class="w-12 h-12 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-xl">🔵</div>
@@ -247,7 +236,6 @@
         </button>
       </div>
 
-      <!-- 대전모드 랭킹 TOP 10 -->
       <div class="pt-2 border-t border-slate-800">
         <div class="bg-slate-950/90 border border-slate-800 rounded-xl p-3">
           <div class="flex items-center justify-between mb-2">
@@ -263,11 +251,9 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
     <!-- 화면 2: 칼바람 나락 인게임 전장 & LoL HUD -->
-    <!-- ========================================== -->
     <section id="gameAreaSection" class="hidden flex-col gap-2.5">
-      <!-- 상단 스코어보드 & 미니맵 바 -->
+      <!-- 상단 스코어보드 -->
       <div class="bg-slate-900/95 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between gap-2 flex-wrap shadow-lg">
         <div class="flex items-center gap-2 min-w-0">
           <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs font-black" id="hudBlueScore">🔵 0</span>
@@ -287,9 +273,9 @@
         </div>
       </div>
 
-      <!-- 메인 칼바람 나락 캔버스 -->
+      <!-- 메인 칼바람 나락 캔버스 (내부에 가리는 UI 없이 전장만 온전히 표시) -->
       <div class="relative bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
-        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[2/1] min-h-[260px] max-h-[520px] bg-slate-950">
+        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[2/1] min-h-[240px] max-h-[520px] bg-slate-950">
           <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
 
           <!-- 3-2-1 카운트다운 -->
@@ -317,11 +303,6 @@
             </div>
           </div>
 
-          <!-- 모바일 터치 가상 조이스틱 (캔버스 좌측 하단) -->
-          <div id="touchJoystickZone" class="sm:hidden absolute bottom-3 left-3 w-24 h-24 rounded-full bg-slate-900/50 border border-sky-400/35 backdrop-blur-sm z-10 flex items-center justify-center touch-none">
-            <div id="touchJoystickKnob" class="w-10 h-10 rounded-full bg-sky-400/60 border-2 border-white/70 shadow-lg pointer-events-none"></div>
-          </div>
-
           <!-- 상점 팝업 (게임 내 B키 또는 상점 버튼) -->
           <div id="shopOverlay" class="hidden absolute inset-0 z-20 items-center justify-center bg-black/70 backdrop-blur-sm p-3">
             <div class="bg-slate-900 border-2 border-amber-500/50 rounded-2xl max-w-md w-full p-4 shadow-2xl">
@@ -341,27 +322,35 @@
         </div>
       </div>
 
-      <!-- LoL 스타일 하단 챔피언 HUD (초상화 + 체력/마나 + Q/W/E/R/D/공격 + 상점) -->
+      <!-- LoL 스타일 하단 챔피언 HUD + 모바일 전용 좌측 외부 조이스틱 -->
       <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <!-- 좌측: 내 챔피언 상태 -->
+        <!-- 좌측: 모바일 조이스틱(게임 화면 바깥 좌측 하단) + 내 챔피언 상태 -->
         <div class="flex items-center gap-3 min-w-0">
-          <div class="relative shrink-0">
-            <div id="hudPortrait" class="w-12 h-12 rounded-xl bg-slate-800 border-2 border-sky-400 flex items-center justify-center text-2xl shadow-inner">⚔️</div>
-            <span id="hudLevel" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border border-slate-900">1</span>
+          <!-- 모바일 전용 가상 조이스틱 (캔버스 밖 하단 왼쪽에 독립 배치되어 게임 화면을 가리지 않음) -->
+          <div id="touchJoystickZone" class="sm:hidden relative w-24 h-24 rounded-full bg-slate-950/90 border-2 border-sky-500/45 shadow-inner shrink-0 flex items-center justify-center touch-none">
+            <div class="absolute inset-2 rounded-full border border-dashed border-slate-700/80 pointer-events-none"></div>
+            <div id="touchJoystickKnob" class="w-10 h-10 rounded-full bg-gradient-to-b from-sky-400 to-blue-600 border-2 border-white/80 shadow-lg pointer-events-none flex items-center justify-center text-[10px] font-black text-white">✥</div>
           </div>
-          <div class="flex-1 min-w-0 sm:w-48">
-            <div class="flex items-center justify-between text-xs font-extrabold">
-              <span id="hudChampName" class="text-sky-300 truncate">카렌 (기사)</span>
-              <span id="hudKdaText" class="text-[11px] text-slate-300 tabular-nums">0/0 · CS 0</span>
+
+          <div class="flex-1 flex items-center gap-2.5 min-w-0">
+            <div class="relative shrink-0">
+              <div id="hudPortrait" class="w-12 h-12 rounded-xl bg-slate-800 border-2 border-sky-400 flex items-center justify-center text-2xl shadow-inner">⚔️</div>
+              <span id="hudLevel" class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-amber-400 text-slate-950 font-black text-[10px] flex items-center justify-center border border-slate-900">1</span>
             </div>
-            <!-- HP Bar -->
-            <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
-              <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
-              <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white drop-shadow">1250 / 1250</span>
-            </div>
-            <!-- MP Bar -->
-            <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
-              <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
+            <div class="flex-1 min-w-0 sm:w-48">
+              <div class="flex items-center justify-between text-xs font-extrabold">
+                <span id="hudChampName" class="text-sky-300 truncate">카렌 (기사)</span>
+                <span id="hudKdaText" class="text-[11px] text-slate-300 tabular-nums">0/0 · CS 0</span>
+              </div>
+              <!-- HP Bar -->
+              <div class="w-full h-3 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
+                <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
+                <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white drop-shadow">1250 / 1250</span>
+              </div>
+              <!-- MP Bar -->
+              <div class="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800 mt-1 relative">
+                <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -423,11 +412,11 @@
       </div>
 
       <div class="text-center text-[11px] text-slate-400">
-        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">방향키(↑↓←→) / 마우스 클릭 이동</kbd> · 기본공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
+        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">하단 조이스틱 / 화면 터치 이동</kbd> · 기본공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
       </div>
     </section>
 
-    <!-- 바로가기 만들기 카드 (최하단 배치) -->
+    <!-- 바로가기 만들기 카드 -->
     <section class="bg-gradient-to-br from-slate-900 to-sky-950/30 border border-sky-500/35 rounded-2xl p-3.5 shadow-xl shadow-black/40 mb-4">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
@@ -531,37 +520,30 @@
       // ==========================================
       // 1. 챔피언 & 상점 아이템 & 서버/상태 정의
       // ==========================================
-      // 성기사(카렌) 고퀄리티 2D 캐릭터 일러스트 (SVG & Canvas 오프스크린 스프라이트)
       const KAREN_PALADIN_SVG = `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="kSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f1f5f9"/><stop offset="55%" stop-color="#94a3b8"/><stop offset="100%" stop-color="#475569"/></linearGradient>
           <linearGradient id="kGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fef08a"/><stop offset="50%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#92400e"/></linearGradient>
           <linearGradient id="kCape" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#991b1b"/><stop offset="100%" stop-color="#450a0a"/></linearGradient>
         </defs>
-        <!-- 진홍색 망토 -->
         <path d="M22 30 L14 68 L66 68 L58 30 Z" fill="url(#kCape)" stroke="#f59e0b" stroke-width="1.5"/>
-        <!-- 성검 (오른손) -->
         <g transform="translate(56,14) rotate(24)">
           <rect x="-2.5" y="0" width="5" height="32" rx="1.5" fill="url(#kSteel)" stroke="#e2e8f0" stroke-width="0.8"/>
           <rect x="-0.8" y="4" width="1.6" height="22" fill="#fef08a"/>
           <rect x="-8" y="31" width="16" height="4" rx="1.5" fill="url(#kGold)"/>
           <rect x="-2" y="35" width="4" height="8" fill="#451a03"/>
         </g>
-        <!-- 몸통 갑주 & 황금 십자 -->
         <path d="M27 32 L53 32 L50 58 L30 58 Z" fill="url(#kSteel)" stroke="#cbd5e1" stroke-width="1.4"/>
         <rect x="38" y="35" width="4" height="17" fill="url(#kGold)"/>
         <rect x="33" y="40" width="14" height="4" fill="url(#kGold)"/>
-        <!-- 3단 어깨 갑주 -->
         <path d="M16 33 Q24 22 33 32 L28 42 L18 40 Z" fill="url(#kSteel)" stroke="url(#kGold)" stroke-width="1.8"/>
         <path d="M64 33 Q56 22 47 32 L52 42 L62 40 Z" fill="url(#kSteel)" stroke="url(#kGold)" stroke-width="1.8"/>
-        <!-- 투구 & 붉은 깃털 & 빛나는 눈 -->
         <path d="M38 6 L42 6 L44 16 L36 16 Z" fill="#991b1b"/>
         <ellipse cx="40" cy="21" rx="11" ry="12" fill="url(#kSteel)" stroke="url(#kGold)" stroke-width="1.8"/>
         <rect x="39" y="10" width="2" height="19" fill="url(#kGold)"/>
         <rect x="32" y="19" width="16" height="3.2" rx="1" fill="#090a0f"/>
         <circle cx="36" cy="20.6" r="1.3" fill="#fef08a"/>
         <circle cx="44" cy="20.6" r="1.3" fill="#fef08a"/>
-        <!-- 자카룸 황금 십자 방패 (왼손) -->
         <g transform="translate(15,34)">
           <path d="M0 0 L20 0 L21 15 L10 29 L-1 15 Z" fill="url(#kCape)" stroke="url(#kGold)" stroke-width="2.4"/>
           <rect x="8.5" y="3" width="3" height="20" fill="url(#kGold)"/>
@@ -576,24 +558,18 @@
           <linearGradient id="cIce" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="50%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0369a1"/></linearGradient>
           <linearGradient id="cFur" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f8fafc"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient>
         </defs>
-        <!-- 화살통 (등 뒤) -->
         <g transform="translate(18,16) rotate(-22)">
           <rect x="0" y="6" width="8" height="24" rx="2" fill="#334155" stroke="#94a3b8" stroke-width="1"/>
           <polygon points="1,6 3,0 5,6" fill="#bae6fd"/><polygon points="4,6 6,1 8,6" fill="#38bdf8"/>
         </g>
-        <!-- 서리 망토 -->
         <path d="M22 30 L13 68 L61 68 L54 30 Z" fill="url(#cCloak)" stroke="#38bdf8" stroke-width="1.4"/>
-        <!-- 몸통 경갑 -->
         <path d="M28 32 L50 32 L47 58 L31 58 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.4"/>
         <path d="M39 34 L43 44 L39 52 L35 44 Z" fill="url(#cIce)"/>
-        <!-- 모피 어깨 망토 -->
         <path d="M18 33 Q39 24 60 33 L56 40 Q39 34 22 40 Z" fill="url(#cFur)" stroke="#94a3b8" stroke-width="1"/>
-        <!-- 서리 후드 & 빛나는 눈 -->
         <path d="M26 26 Q39 6 52 26 L50 34 Q39 31 28 34 Z" fill="url(#cCloak)" stroke="#7dd3fc" stroke-width="1.5"/>
         <ellipse cx="39" cy="23" rx="8.5" ry="8.5" fill="#090d16"/>
         <circle cx="35.5" cy="22.5" r="1.5" fill="#67e8f9"/>
         <circle cx="42.5" cy="22.5" r="1.5" fill="#67e8f9"/>
-        <!-- 크리스탈 얼음 활 & 서리 화살 -->
         <g transform="translate(49,12)">
           <path d="M6 2 Q24 26 6 52" fill="none" stroke="url(#cIce)" stroke-width="3.6" stroke-linecap="round"/>
           <line x1="6" y1="3" x2="6" y2="51" stroke="#e0f2fe" stroke-width="1"/>
@@ -607,28 +583,23 @@
           <linearGradient id="tArmor" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#cbd5e1"/><stop offset="50%" stop-color="#64748b"/><stop offset="100%" stop-color="#1e293b"/></linearGradient>
           <linearGradient id="tIce" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e0f2fe"/><stop offset="60%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#1d4ed8"/></linearGradient>
         </defs>
-        <!-- 거대 빙하 전투 망치 (오른손) -->
         <g transform="translate(56,12) rotate(18)">
           <rect x="-2" y="14" width="4" height="36" fill="#334155" stroke="#94a3b8" stroke-width="0.8"/>
           <rect x="-11" y="2" width="22" height="14" rx="2.5" fill="url(#tArmor)" stroke="#7dd3fc" stroke-width="1.6"/>
           <polygon points="0,4 5,9 0,14 -5,9" fill="#38bdf8"/>
         </g>
-        <!-- 거대 갑주 몸통 -->
         <path d="M21 29 L59 29 L55 64 L25 64 Z" fill="url(#tArmor)" stroke="#94a3b8" stroke-width="1.6"/>
         <polygon points="40,34 48,44 40,54 32,44" fill="url(#tIce)" stroke="#e0f2fe" stroke-width="1.2"/>
-        <!-- 거대 빙하 어깨 갑주 + 얼음 결정 -->
         <path d="M10 34 Q20 16 33 30 L27 44 L13 42 Z" fill="url(#tArmor)" stroke="#7dd3fc" stroke-width="1.8"/>
         <path d="M70 34 Q60 16 47 30 L53 44 L67 42 Z" fill="url(#tArmor)" stroke="#7dd3fc" stroke-width="1.8"/>
         <polygon points="16,22 20,11 24,23" fill="url(#tIce)"/>
         <polygon points="64,22 60,11 56,23" fill="url(#tIce)"/>
-        <!-- 뿔 달린 중장갑 투구 -->
         <path d="M27 18 Q20 10 23 5 Q28 11 32 15 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="0.9"/>
         <path d="M53 18 Q60 10 57 5 Q52 11 48 15 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="0.9"/>
         <rect x="29" y="11" width="22" height="20" rx="7" fill="url(#tArmor)" stroke="#bae6fd" stroke-width="1.6"/>
         <rect x="33" y="19" width="14" height="3.5" rx="1" fill="#020617"/>
         <circle cx="36.5" cy="20.7" r="1.4" fill="#38bdf8"/>
         <circle cx="43.5" cy="20.7" r="1.4" fill="#38bdf8"/>
-        <!-- 거대 빙하 타워 실드 (왼손) -->
         <g transform="translate(10,31)">
           <path d="M0 0 L24 0 L24 25 L12 37 L0 25 Z" fill="#1e3a5f" stroke="url(#tIce)" stroke-width="2.6"/>
           <path d="M12 4 L19 16 L12 31 L5 16 Z" fill="url(#tIce)" opacity="0.85"/>
@@ -649,7 +620,6 @@
         img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
       });
 
-      // 미니언(근접/원거리/대장), 포탈, 넥서스 전용 2D 일러스트 스프라이트
       function makeMinionSvg(kind, team) {
         const isBlue = team === 'blue';
         const c1 = isBlue ? '#38bdf8' : '#fb7185';
@@ -675,7 +645,6 @@
             <circle cx="50" cy="12" r="5" fill="${c3}" stroke="${c1}" stroke-width="1.5"/>
           </svg>`;
         }
-        // 대장 미니언 (Captain / Siege)
         return `<svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
           <polygon points="24,14 28,4 36,11 44,4 48,14" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
           <path d="M16 28 L56 28 L52 62 L20 62 Z" fill="${c2}" stroke="#fbbf24" stroke-width="2.5"/>
@@ -741,21 +710,16 @@
               <stop offset="100%" stop-color="${c2}"/>
             </radialGradient>
           </defs>
-          <!-- 바닥 3D 그림자 -->
           <ellipse cx="50" cy="106" rx="36" ry="11" fill="rgba(0,0,0,0.6)"/>
-          <!-- 3D 팔각 석조 받침대 -->
           <polygon points="18,96 34,86 66,86 82,96 68,108 32,108" fill="url(#twStone_${team})" stroke="#94a3b8" stroke-width="1.5"/>
           <polygon points="24,88 38,80 62,80 76,88 64,96 36,96" fill="#1e293b" stroke="url(#twGold_${team})" stroke-width="1.6"/>
-          <!-- 3D 명암 포탑 기둥 -->
           <polygon points="35,38 65,38 71,86 29,86" fill="url(#twStone_${team})" stroke="#475569" stroke-width="1.5"/>
           <rect x="44" y="42" width="12" height="40" rx="2" fill="#0f172a" stroke="${c1}" stroke-width="1.2"/>
           <line x1="50" y1="45" x2="50" y2="79" stroke="${c1}" stroke-width="2" opacity="0.8"/>
-          <!-- 상단 황금 왕관 받침 -->
           <polygon points="26,34 74,34 67,44 33,44" fill="url(#twGold_${team})" stroke="#fef08a" stroke-width="1.2"/>
           <polygon points="29,26 36,34 24,34" fill="url(#twGold_${team})"/>
           <polygon points="71,26 64,34 76,34" fill="url(#twGold_${team})"/>
           <polygon points="50,22 57,34 43,34" fill="url(#twGold_${team})"/>
-          <!-- 공중 부양 에너지 크리스탈 오브 -->
           <circle cx="50" cy="17" r="12" fill="url(#twOrb_${team})" stroke="${c3}" stroke-width="1.8"/>
           <ellipse cx="46" cy="13" rx="3.5" ry="2" fill="#ffffff" opacity="0.8"/>
         </svg>`;
@@ -965,14 +929,14 @@
       }
 
       // ==========================================
-      // 3. Socket.io PvP 실시간 매칭 (대결매칭구조 참고)
+      // 3. Socket.io PvP 실시간 매칭
       // ==========================================
       let socket = { emit: () => {}, on: () => {}, connected: false, id: 'local_' + Math.floor(Math.random() * 9999) };
-      let currentMode = 'practice'; // 'practice' | 'pvp'
+      let currentMode = 'practice';
       let myGuestName = '소환사_' + Math.floor(Math.random() * 900 + 100);
       let lastLobbyPlayers = [];
       let pvpRoomName = null;
-      let pvpRole = null; // 'left' | 'right'
+      let pvpRole = null;
       let pvpLeftChamp = 'karen';
       let pvpRightChamp = 'cash';
       let pvpLeftName = '블루팀';
@@ -1138,7 +1102,6 @@
         Object.values(CHAMPIONS).forEach(ch => {
           const isSel = state.selectedChamp === ch.id;
 
-          // 연습 모드 상세 카드
           const card = document.createElement('div');
           card.className = `rounded-2xl p-3.5 border-2 transition cursor-pointer flex flex-col justify-between gap-2.5 ${
             isSel ? 'bg-sky-950/40 border-sky-400 frost-glow' : 'bg-slate-950/80 border-slate-800 hover:border-slate-600'
@@ -1171,7 +1134,6 @@
           });
           pGrid.appendChild(card);
 
-          // 대전 모드 콤팩트 버튼
           const pBtn = document.createElement('button');
           pBtn.type = 'button';
           pBtn.className = `p-2.5 rounded-xl border text-left transition cursor-pointer flex items-center gap-2 ${
@@ -1203,7 +1165,7 @@
       }
 
       // ==========================================
-      // 5. 칼바람 나락 (Howling Abyss) 게임 엔진
+      // 5. 칼바람 나락 게임 엔진
       // ==========================================
       const WORLD_W = 1400;
       const WORLD_H = 560;
@@ -1229,10 +1191,10 @@
 
       let gameRunning = false;
       let matchPaused = true;
-      let gameModeActive = 'practice'; // 'practice' | 'pvp'
+      let gameModeActive = 'practice';
       let matchTime = 0;
       let waveCount = 0;
-      let waveTimer = 2.0; // 첫 웨이브 빠르게 생성
+      let waveTimer = 2.0;
       let teamKills = { blue: 0, red: 0 };
 
       let structures = [];
@@ -1298,13 +1260,11 @@
 
       function initArenaEntities() {
         structures = [
-          // 블루팀 (넥서스 + 쌍둥이 수호 포탑 2개 + 2차/1차 포탑)
           { id: 'blue_nexus', team: 'blue', type: 'nexus', name: '블루 넥서스', x: 105, y: 280, radius: 42, hp: 3000, maxHp: 3000, range: 0, atkCd: 0, atkTimer: 0, dmg: 0 },
           { id: 'blue_s1', team: 'blue', type: 'turret', name: '블루 상단 수호 포탑', x: 160, y: 170, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
           { id: 'blue_s2', team: 'blue', type: 'turret', name: '블루 하단 수호 포탑', x: 160, y: 390, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
           { id: 'blue_t2', team: 'blue', type: 'turret', name: '블루 2차 포탑', x: 255, y: 280, radius: 26, hp: 1800, maxHp: 1800, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 95 },
           { id: 'blue_t1', team: 'blue', type: 'turret', name: '블루 1차 포탑', x: 445, y: 280, radius: 26, hp: 1500, maxHp: 1500, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 85 },
-          // 레드팀 (넥서스 + 쌍둥이 수호 포탑 2개 + 2차/1차 포탑)
           { id: 'red_nexus', team: 'red', type: 'nexus', name: '레드 넥서스', x: WORLD_W - 105, y: 280, radius: 42, hp: 3000, maxHp: 3000, range: 0, atkCd: 0, atkTimer: 0, dmg: 0 },
           { id: 'red_s1', team: 'red', type: 'turret', name: '레드 상단 수호 포탑', x: WORLD_W - 160, y: 170, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
           { id: 'red_s2', team: 'red', type: 'turret', name: '레드 하단 수호 포탑', x: WORLD_W - 160, y: 390, radius: 26, hp: 1600, maxHp: 1600, range: 210, atkCd: 1.1, atkTimer: 0, dmg: 90 },
@@ -1314,13 +1274,11 @@
 
         portals = [];
 
-        // 다리 위 체력의 유물 2개
         relics = [
           { x: 585, y: 135, radius: 18, active: true, timer: 0 },
           { x: 815, y: 425, radius: 18, active: true, timer: 0 }
         ];
 
-        // 칼바람 중앙 부시 2개
         bushes = [
           { x: 640, y: 105, w: 120, h: 46 },
           { x: 640, y: 409, w: 120, h: 46 }
@@ -1340,7 +1298,6 @@
           const nx = team === 'blue' ? 105 : WORLD_W - 105;
           const ny = 280;
           const dir = team === 'blue' ? 1 : -1;
-          // 넥서스에서 근접 2 + 원거리 2 + 대장 미니언 1 = 총 5마리 생성
           [-38, 38].forEach(dy => {
             minions.push({
               team, kind: 'melee', x: nx + dir * 42, y: ny + dy,
@@ -1501,7 +1458,6 @@
           return;
         }
         if (target.kind) {
-          // 미니언 사망
           if (killer && killer.champId) {
             killer.gold += target.gold;
             killer.cs++;
@@ -1514,7 +1470,6 @@
           return;
         }
         if (target.champId) {
-          // 챔피언 사망
           target.dead = true;
           target.deaths++;
           target.respawnTimer = 4 + Math.min(8, target.level);
@@ -1554,14 +1509,12 @@
         let best = null;
         let bestDist = maxRange;
 
-        // 1. 미니언 우선 또는 사거리 내 적
         minions.forEach(m => {
           if (m.team === oppTeam && m.hp > 0) {
             const d = Math.hypot(m.x - unit.x, m.y - unit.y);
             if (d < bestDist) { bestDist = d; best = m; }
           }
         });
-        // 2. 적 챔피언
         [myHero, enemyHero].forEach(h => {
           if (h && h.team === oppTeam && !h.dead && h.hp > 0) {
             const d = Math.hypot(h.x - unit.x, h.y - unit.y);
@@ -1569,7 +1522,6 @@
             if (!isStealthed && d < bestDist) { bestDist = d; best = h; }
           }
         });
-        // 3. 적 포탑/넥서스
         structures.forEach(s => {
           if (s.team === oppTeam && s.hp > 0) {
             const d = Math.hypot(s.x - unit.x, s.y - unit.y);
@@ -1593,7 +1545,6 @@
         if (hero.critNext) { dmg *= 1.65; hero.critNext = false; }
 
         if (hero.champId === 'cash') {
-          // 원거리 화살 발사
           projectiles.push({
             team: hero.team, owner: hero, x: hero.x, y: hero.y,
             tx: target.x, ty: target.y, target, speed: 620, dmg,
@@ -1607,7 +1558,6 @@
             });
           }
         } else {
-          // 근접 베기
           vfxList.push({ type: 'slash', x: hero.x, y: hero.y, angle: hero.facing, r: hero.range, color: CHAMPIONS[hero.champId].accent, life: 0.22 });
           dealDamage(target, dmg, hero);
         }
@@ -1735,7 +1685,6 @@
         const nexusX = ownNexus ? ownNexus.x : (ai.team === 'red' ? WORLD_W - 105 : 105);
         const nexusY = ownNexus ? ownNexus.y : 280;
 
-        // 체력이 32% 미만이면 넥서스로 후퇴, 90% 이상 회복될 때까지 넥서스 위에서 대기 후 재출격
         if (ai.hp / ai.maxHp < 0.32) {
           ai.aiRetreating = true;
         } else if (ai.aiRetreating && ai.hp / ai.maxHp >= 0.90) {
@@ -1749,7 +1698,6 @@
           return;
         }
 
-        // 가까운 유물 챙기기
         const activeRelic = relics.find(r => r.active && Math.hypot(r.x - ai.x, r.y - ai.y) < 180);
         if (activeRelic && ai.hp < ai.maxHp * 0.75) {
           ai.targetX = activeRelic.x; ai.targetY = activeRelic.y;
@@ -1802,7 +1750,6 @@
           return;
         }
 
-        // 쿨다운 & 버프 감소
         ['Q', 'W', 'E', 'R', 'D'].forEach(k => { if (h.cds[k] > 0) h.cds[k] = Math.max(0, h.cds[k] - dt); });
         if (h.atkTimer > 0) h.atkTimer = Math.max(0, h.atkTimer - dt);
         if (h.stunTimer > 0) h.stunTimer = Math.max(0, h.stunTimer - dt);
@@ -1817,7 +1764,6 @@
         if (h.combatTimer > 0) h.combatTimer -= dt;
         if (h.revealTimer > 0) h.revealTimer = Math.max(0, h.revealTimer - dt);
 
-        // 마나/체력 재생 & 넥서스 우물 회복
         h.mp = Math.min(h.maxMp, h.mp + 14 * dt);
         h.gold += (state.isVip && h === myHero ? 6 : 3) * dt;
         const ownNexus = structures.find(s => s.type === 'nexus' && s.team === h.team && s.hp > 0);
@@ -1840,7 +1786,6 @@
           return;
         }
 
-        // 이동 처리
         let mx = 0, my = 0;
         if (h === myHero) {
           if (keysPressed['ArrowUp']) my -= 1;
@@ -1872,10 +1817,8 @@
         h.x = Math.max(38, Math.min(WORLD_W - 38, h.x));
         h.y = Math.max(LANE_TOP + 10, Math.min(LANE_BOT - 10, h.y));
 
-        // 부시 은신 판정
         h.inBush = bushes.some(b => h.x >= b.x && h.x <= b.x + b.w && h.y >= b.y && h.y <= b.y + b.h);
 
-        // 마법공학 차원문 포탈 워프 (아군 포탈 근처 진입 시 1차 포탑 근처로 이동)
         if (h.portalCd <= 0) {
           const ownPortal = portals.find(p => p.team === h.team && Math.hypot(p.x - h.x, p.y - h.y) < p.radius + 10);
           if (ownPortal) {
@@ -1891,7 +1834,6 @@
       }
 
       function updateMinionsAndStructures(dt) {
-        // 미니언 이동 & 공격
         for (let i = minions.length - 1; i >= 0; i--) {
           const m = minions[i];
           if (m.hp <= 0) { minions.splice(i, 1); continue; }
@@ -1916,12 +1858,10 @@
           }
         }
 
-        // 포탑 공격
         structures.forEach(s => {
           if (s.type !== 'turret' || s.hp <= 0) return;
           if (s.atkTimer > 0) s.atkTimer -= dt;
           const oppTeam = s.team === 'blue' ? 'red' : 'blue';
-          // 사거리 내 미니언 우선, 없으면 챔피언
           let target = minions.find(m => m.team === oppTeam && m.hp > 0 && Math.hypot(m.x - s.x, m.y - s.y) <= s.range);
           if (!target) {
             target = [myHero, enemyHero].find(h => h && h.team === oppTeam && !h.dead && Math.hypot(h.x - s.x, h.y - s.y) <= s.range);
@@ -1935,7 +1875,6 @@
           }
         });
 
-        // 체력의 유물
         relics.forEach(r => {
           if (!r.active) {
             r.timer -= dt;
@@ -1954,7 +1893,6 @@
           });
         });
 
-        // 투사체
         for (let i = projectiles.length - 1; i >= 0; i--) {
           const pr = projectiles[i];
           if (pr.linear) {
@@ -2007,7 +1945,6 @@
       }
 
       function drawHowlingAbyss() {
-        // 1. 심연 배경 (칼바람 나락)
         const abyssGrad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
         abyssGrad.addColorStop(0, '#020617');
         abyssGrad.addColorStop(0.5, '#0c192c');
@@ -2015,7 +1952,6 @@
         ctx.fillStyle = abyssGrad;
         ctx.fillRect(0, 0, WORLD_W, WORLD_H);
 
-        // 2. 거대한 빙하 다리 본체
         const bridgeGrad = ctx.createLinearGradient(0, LANE_TOP, 0, LANE_BOT);
         bridgeGrad.addColorStop(0, '#1e293b');
         bridgeGrad.addColorStop(0.15, '#334155');
@@ -2025,7 +1961,6 @@
         ctx.fillStyle = bridgeGrad;
         ctx.fillRect(30, LANE_TOP, WORLD_W - 60, LANE_BOT - LANE_TOP);
 
-        // 다리 양쪽 난간 테두리 (얼음 빛)
         ctx.strokeStyle = '#38bdf8';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -2033,7 +1968,6 @@
         ctx.moveTo(30, LANE_BOT); ctx.lineTo(WORLD_W - 30, LANE_BOT);
         ctx.stroke();
 
-        // 바닥 석판 타일 & 중앙 칼바람 룬 문양
         ctx.strokeStyle = 'rgba(148, 163, 184, 0.14)';
         ctx.lineWidth = 1.5;
         for (let x = 90; x < WORLD_W - 60; x += 90) {
@@ -2046,7 +1980,6 @@
         ctx.beginPath(); ctx.arc(WORLD_W / 2, 280, 62, 0, Math.PI * 2); ctx.stroke();
         ctx.restore();
 
-        // 3. 부시 (수풀)
         bushes.forEach(b => {
           ctx.fillStyle = 'rgba(16, 185, 129, 0.28)';
           ctx.strokeStyle = 'rgba(52, 211, 153, 0.65)';
@@ -2058,7 +1991,6 @@
           ctx.fillText('🌿 은신 부시', b.x + b.w / 2, b.y + b.h / 2 + 4);
         });
 
-        // 4. 양쪽 포탈 2개씩 (마법공학 차원문 / 미니언 생성 포탈)
         portals.forEach(p => {
           const pSp = worldSprites[`portal_${p.team}`];
           const sz = p.radius * 2.5;
@@ -2075,7 +2007,6 @@
           ctx.restore();
         });
 
-        // 5. 체력의 유물
         relics.forEach(r => {
           if (!r.active) {
             ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
@@ -2096,7 +2027,6 @@
           ctx.restore();
         });
 
-        // 6. 넥서스 & 포탑
         structures.forEach(s => {
           if (s.hp <= 0) {
             ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
@@ -2105,7 +2035,6 @@
           }
           const col = s.team === 'blue' ? '#38bdf8' : '#f43f5e';
           if (s.type === 'turret') {
-            // 포탑 사거리 가이드
             ctx.strokeStyle = s.team === 'blue' ? 'rgba(56, 189, 248, 0.14)' : 'rgba(244, 63, 94, 0.14)';
             ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.arc(s.x, s.y, s.range, 0, Math.PI * 2); ctx.stroke();
@@ -2138,7 +2067,6 @@
           }
           ctx.restore();
 
-          // 구조물 체력바
           const bw = s.type === 'nexus' ? 76 : 52;
           ctx.fillStyle = '#0f172a';
           ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw, 7);
@@ -2146,7 +2074,6 @@
           ctx.fillRect(s.x - bw / 2, s.y - s.radius - 14, bw * (s.hp / s.maxHp), 7);
         });
 
-        // 7. 미니언 (근접/원거리/대장 미니언 이미지 적용)
         minions.forEach(m => {
           const col = m.team === 'blue' ? '#60a5fa' : '#fb7185';
           const mSp = worldSprites[`${m.kind}_${m.team}`];
@@ -2162,7 +2089,6 @@
             ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill();
             ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
           }
-          // 미니언 HP 바
           const bw = m.kind === 'cannon' ? 40 : 26;
           ctx.fillStyle = '#0f172a';
           ctx.fillRect(m.x - bw / 2, m.y - m.radius - 10, bw, 4.5);
@@ -2170,10 +2096,8 @@
           ctx.fillRect(m.x - bw / 2, m.y - m.radius - 10, bw * (m.hp / m.maxHp), 4.5);
         });
 
-        // 8. 챔피언 렌더링
         [myHero, enemyHero].forEach(h => {
           if (!h || h.dead) return;
-          // 상대방이 은신 부시 안에 있고 공격하지 않았으며 근접하지 않았다면 보이지 않음!
           if (h !== myHero && h.inBush && h.revealTimer <= 0) {
             const sameBushOrNear = myHero && !myHero.dead && Math.hypot(myHero.x - h.x, myHero.y - h.y) <= 95;
             if (!sameBushOrNear) return;
@@ -2183,14 +2107,12 @@
           ctx.save();
           if (h.inBush && h.revealTimer <= 0) ctx.globalAlpha = 0.50;
 
-          // 이동 목적지 마커
           if (h === myHero && h.targetX !== null) {
             ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(h.targetX, h.targetY, 8, 0, Math.PI * 2); ctx.stroke();
           }
 
-          // VIP 오오라 또는 보호막
           if (h.shield > 0) {
             ctx.strokeStyle = '#bae6fd'; ctx.lineWidth = 3;
             ctx.beginPath(); ctx.arc(h.x, h.y, h.radius + 6, 0, Math.PI * 2); ctx.stroke();
@@ -2215,7 +2137,6 @@
             ctx.fillText(c.icon, h.x, h.y + 1);
           }
 
-          // 이름표 & 체력바
           ctx.fillStyle = '#f8fafc';
           ctx.font = 'bold 11px "Noto Sans KR"';
           ctx.fillText(`Lv.${h.level} ${h.name}`, h.x, h.y - h.radius - 20);
@@ -2237,7 +2158,6 @@
           ctx.restore();
         });
 
-        // 9. 투사체 & VFX & 플로팅 텍스트
         projectiles.forEach(pr => {
           ctx.save();
           ctx.fillStyle = pr.color;
@@ -2281,7 +2201,6 @@
           ctx.restore();
         }
 
-        // 10. 칼바람 눈송이 파티클
         ctx.fillStyle = 'rgba(224, 242, 254, 0.55)';
         snowParticles.forEach(sp => {
           sp.x += sp.vx * 0.016;
@@ -2405,30 +2324,58 @@
         mouseWorld = screenToWorld(e.clientX, e.clientY);
       });
 
-      // 모바일 터치 조이스틱
+      // 모바일 터치 가상 조이스틱 (캔버스 외부 좌측 하단 HUD 영역)
       const joyZone = document.getElementById('touchJoystickZone');
       const joyKnob = document.getElementById('touchJoystickKnob');
       let joyActive = false;
-      joyZone.addEventListener('pointerdown', (e) => { e.stopPropagation(); joyActive = true; });
-      window.addEventListener('pointermove', (e) => {
-        if (!joyActive) return;
+      let joyPointerId = null;
+
+      function updateJoystickPosition(clientX, clientY) {
         const rect = joyZone.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
-        const dx = e.clientX - cx;
-        const dy = e.clientY - cy;
-        const maxR = rect.width / 2 - 12;
+        const dx = clientX - cx;
+        const dy = clientY - cy;
+        const maxR = rect.width / 2 - 14;
         const dist = Math.hypot(dx, dy);
         const clamped = Math.min(dist, maxR);
         const ang = Math.atan2(dy, dx);
         joyKnob.style.transform = `translate(${Math.cos(ang) * clamped}px, ${Math.sin(ang) * clamped}px)`;
         joyVec = { x: (Math.cos(ang) * clamped) / maxR, y: (Math.sin(ang) * clamped) / maxR };
-      });
-      window.addEventListener('pointerup', () => {
-        if (!joyActive) return;
+      }
+
+      function resetJoystick() {
         joyActive = false;
+        joyPointerId = null;
         joyKnob.style.transform = 'translate(0px, 0px)';
         joyVec = { x: 0, y: 0 };
+      }
+
+      joyZone.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        getAudioContext();
+        joyActive = true;
+        joyPointerId = e.pointerId;
+        if (joyZone.setPointerCapture) {
+          try { joyZone.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+        updateJoystickPosition(e.clientX, e.clientY);
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!joyActive || (joyPointerId !== null && e.pointerId !== joyPointerId)) return;
+        updateJoystickPosition(e.clientX, e.clientY);
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        if (!joyActive || (joyPointerId !== null && e.pointerId !== joyPointerId)) return;
+        resetJoystick();
+      });
+
+      window.addEventListener('pointercancel', (e) => {
+        if (!joyActive || (joyPointerId !== null && e.pointerId !== joyPointerId)) return;
+        resetJoystick();
       });
 
       window.addEventListener('keydown', (e) => {
@@ -2693,7 +2640,6 @@
         }
       });
 
-      // VIP & 초기화 & 사운드 토글 & 바로가기
       const vipModal = document.getElementById('vipModal');
       document.getElementById('vipOpenBtn').addEventListener('click', () => { vipModal.classList.remove('hidden'); vipModal.classList.add('flex'); });
       document.getElementById('vipCloseBtn').addEventListener('click', () => { vipModal.classList.add('hidden'); vipModal.classList.remove('flex'); });
