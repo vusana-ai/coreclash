@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#0f172a" />
   <link rel="manifest" href="./manifest.json" />
-  <title>칼바람 — 리그 오브 레전드 스타일</title>
+  <title>칼바람 — 라인 푸쉬 스타일</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.5/dist/socket.io.min.js"></script>
   <script src="https://js.tosspayments.com/v2/standard"></script>
@@ -18,6 +18,7 @@
       user-select: none;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior: none;
+      overflow-x: hidden;
     }
     canvas {
       touch-action: none;
@@ -40,15 +41,94 @@
       50% { box-shadow: 0 0 24px rgba(56, 189, 248, 0.55); }
     }
     .frost-glow { animation: frostGlow 2.6s infinite ease-in-out; }
+
+    /* ============================================================== */
+    /* 전체화면 (집중 모드): 게임 화면 최대한 꽉 채우고 패드는 아래로 밀착 */
+    /* ============================================================== */
+    body.focus-fullscreen {
+      overflow: hidden !important;
+      height: 100dvh !important;
+      width: 100vw !important;
+      background: #020617;
+    }
+    body.focus-fullscreen #topHeader,
+    body.focus-fullscreen #modeBarSection,
+    body.focus-fullscreen #practiceSelectSection,
+    body.focus-fullscreen #pvpLobbySection,
+    body.focus-fullscreen #installSection,
+    body.focus-fullscreen #controlGuideFooter {
+      display: none !important;
+    }
+    body.focus-fullscreen main {
+      max-width: 100% !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      padding: 2px 4px !important;
+      margin: 0 !important;
+      gap: 3px !important;
+    }
+    body.focus-fullscreen #gameAreaSection {
+      flex: 1 1 0% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      justify-content: space-between !important;
+      gap: 3px !important;
+    }
+    body.focus-fullscreen #canvasOuterBox {
+      flex: 1 1 0% !important;
+      min-height: 0 !important;
+      border-radius: 12px !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    body.focus-fullscreen #canvasWrapper {
+      flex: 1 1 0% !important;
+      height: 100% !important;
+      max-height: none !important;
+      min-height: 0 !important;
+      aspect-ratio: auto !important;
+    }
+    /* 전체화면일 때 하단 게임패드를 아래로 슬림하게 밀어 게임 화면 비중 극대화 */
+    body.focus-fullscreen #bottomControlPanel {
+      padding: 5px 12px !important;
+      border-radius: 12px !important;
+    }
+    body.focus-fullscreen #padLayoutBox {
+      flex-wrap: nowrap !important;
+      gap: 10px !important;
+    }
+    body.focus-fullscreen #centerStatusBox {
+      order: 2 !important;
+      width: auto !important;
+      flex: 1 1 0% !important;
+      max-width: 340px !important;
+    }
+    body.focus-fullscreen #rightSkillBox {
+      order: 3 !important;
+    }
+    body.focus-fullscreen #touchJoystickZone {
+      width: 78px !important;
+      height: 78px !important;
+    }
+    body.focus-fullscreen #touchJoystickKnob {
+      width: 34px !important;
+      height: 34px !important;
+    }
+    body.focus-fullscreen .skill-btn-qwer {
+      height: 46px !important;
+    }
+    body.focus-fullscreen .skill-btn-top {
+      height: 34px !important;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
-  <!-- Header -->
-  <header class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-4 py-2.5 sticky top-0 z-30 shadow-lg shadow-black/25">
+  <!-- Header (전체화면 시 자동 숨김) -->
+  <header id="topHeader" class="border-b border-slate-800/80 bg-slate-900/90 backdrop-blur px-3 sm:px-4 py-2 sticky top-0 z-30 shadow-lg shadow-black/25">
     <div class="max-w-5xl mx-auto flex flex-col gap-2">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2 min-w-0 flex-wrap">
-          <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400/25 to-blue-600/25 text-sky-300 font-extrabold text-sm border border-sky-400/40 shadow-inner shrink-0">❄️</span>
+          <span class="inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-gradient-to-br from-sky-400/25 to-blue-600/25 text-sky-300 font-extrabold text-sm border border-sky-400/40 shadow-inner shrink-0">❄️</span>
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-50 shrink-0">칼바람</h1>
           <span id="userBadge" class="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-bold bg-slate-800 border border-slate-700 text-slate-300 shrink-0">
             👤 게스트
@@ -83,13 +163,13 @@
           로그인 시 칼바람 대전 전적이 자동으로 기록됩니다
         </p>
         <div class="flex items-center gap-1.5 shrink-0 ml-auto">
-          <button id="bgmToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
+          <button id="bgmToggleBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-indigo-950/80 hover:bg-indigo-900/80 border border-indigo-700/60 text-indigo-200 transition active:scale-95 cursor-pointer">
             🎵 배경음 ON
           </button>
-          <button id="soundToggleBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
+          <button id="soundToggleBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition active:scale-95 cursor-pointer">
             🔊 효과음 ON
           </button>
-          <button id="resetOpenBtn" type="button" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-slate-800 hover:bg-rose-950/70 hover:text-rose-300 border border-slate-700 hover:border-rose-700/60 text-slate-300 transition active:scale-95 cursor-pointer">
+          <button id="resetOpenBtn" type="button" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-semibold bg-slate-800 hover:bg-rose-950/70 hover:text-rose-300 border border-slate-700 hover:border-rose-700/60 text-slate-300 transition active:scale-95 cursor-pointer">
             초기화
           </button>
         </div>
@@ -98,15 +178,15 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col gap-3.5">
+  <main class="flex-1 max-w-6xl w-full mx-auto px-2.5 sm:px-4 py-2.5 sm:py-4 flex flex-col gap-3">
 
-    <!-- 상단 모드 선택 바 -->
-    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xl shadow-black/30 flex items-center justify-between gap-2 flex-wrap">
-      <div class="flex items-center gap-2">
-        <button id="modePracticeTab" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-sky-600 text-white shadow transition cursor-pointer">
+    <!-- 상단 모드 선택 바 (전체화면 시 자동 숨김) -->
+    <section id="modeBarSection" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5 sm:p-3.5 shadow-xl shadow-black/30 flex items-center justify-between gap-2 flex-wrap">
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button id="modePracticeTab" type="button" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-sky-600 text-white shadow transition cursor-pointer">
           ❄️ 연습 모드 (AI 칼바람)
         </button>
-        <button id="modePvPTab" type="button" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer">
+        <button id="modePvPTab" type="button" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer">
           ⚔️ 대전 모드 (실시간 매칭)
         </button>
       </div>
@@ -251,32 +331,43 @@
       </div>
     </section>
 
-    <!-- 화면 2: 칼바람 나락 인게임 전장 & LoL HUD -->
-    <section id="gameAreaSection" class="hidden flex-col gap-2.5">
-      <!-- 상단 스코어보드 -->
-      <div class="bg-slate-900/95 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between gap-2 flex-wrap shadow-lg">
-        <div class="flex items-center gap-2 min-w-0">
-          <span class="px-2 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs font-black" id="hudBlueScore">🔵 0</span>
-          <span class="text-[11px] font-bold text-slate-400">VS</span>
-          <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-black" id="hudRedScore">0 🔴</span>
-          <span class="text-xs font-extrabold text-amber-300 tabular-nums ml-1" id="hudTimer">00:00</span>
-          <span class="hidden sm:inline-block text-[11px] text-slate-400 font-semibold" id="hudWaveInfo">웨이브 1</span>
-        </div>
+    <!-- ============================================================== -->
+    <!-- 화면 2: 칼바람 나락 인게임 전장 & HUD (전체화면 시 이 영역만 표시됨) -->
+    <!-- ============================================================== -->
+    <section id="gameAreaSection" class="hidden flex-col gap-2 w-full">
 
-        <div class="flex items-center gap-2 text-[11px] font-bold">
-          <span class="text-sky-300" id="hudBlueNexus">블루 넥서스 3000</span>
-          <span class="text-slate-600">|</span>
-          <span class="text-rose-300" id="hudRedNexus">레드 넥서스 3000</span>
-          <button id="backToSelectBtn" type="button" class="ml-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-[11px] font-bold cursor-pointer">
-            ↩ 로비로
-          </button>
-        </div>
-      </div>
-
-      <!-- 메인 칼바람 나락 캔버스 -->
-      <div class="relative bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl shadow-black/60">
-        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[2/1] min-h-[240px] max-h-[520px] bg-black">
+      <!-- 메인 칼바람 나락 캔버스 (상단 여백에 스코어보드 & 전체화면 버튼 내장) -->
+      <div id="canvasOuterBox" class="relative bg-slate-950 border-2 border-sky-900/60 rounded-2xl overflow-hidden shadow-2xl shadow-black/60 w-full">
+        <div id="canvasWrapper" class="relative w-full aspect-[16/9] sm:aspect-[21/9] min-h-[210px] max-h-[600px] bg-slate-950">
           <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block"></canvas>
+
+          <!-- [게임 화면 내부 상단 HUD] 스코어보드 + 전체화면 버튼 -->
+          <div class="absolute top-1.5 left-1.5 right-1.5 z-10 flex items-center justify-between gap-1 pointer-events-none">
+            <!-- 좌측: 킬 스코어 & 타이머 & 웨이브 -->
+            <div class="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-slate-950/80 backdrop-blur-md border border-slate-700/70 rounded-xl px-2 py-1 shadow-lg">
+              <span class="px-1.5 py-0.5 rounded bg-sky-500/20 border border-sky-400/40 text-sky-300 text-[10px] sm:text-xs font-black" id="hudBlueScore">🔵 0</span>
+              <span class="text-[9px] sm:text-[10px] font-bold text-slate-400">VS</span>
+              <span class="px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-400/40 text-rose-300 text-[10px] sm:text-xs font-black" id="hudRedScore">0 🔴</span>
+              <span class="text-[10px] sm:text-xs font-extrabold text-amber-300 tabular-nums ml-0.5" id="hudTimer">00:00</span>
+              <span class="hidden md:inline-block text-[10px] text-slate-300 font-semibold ml-1" id="hudWaveInfo">웨이브 1</span>
+            </div>
+
+            <!-- 우측: 양팀 넥서스 체력 + [전체화면 버튼] + [로비로] -->
+            <div class="pointer-events-auto flex items-center gap-1 sm:gap-1.5 bg-slate-950/80 backdrop-blur-md border border-slate-700/70 rounded-xl px-2 py-1 shadow-lg text-[10px] sm:text-[11px] font-bold">
+              <span class="text-sky-300 whitespace-nowrap" id="hudBlueNexus">블루 3000</span>
+              <span class="text-slate-600">|</span>
+              <span class="text-rose-300 whitespace-nowrap" id="hudRedNexus">레드 3000</span>
+
+              <button id="fullscreenBtn" type="button" class="ml-0.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 active:scale-95 text-white border border-sky-300/60 text-[10px] sm:text-[11px] font-black shadow cursor-pointer flex items-center gap-1 shrink-0">
+                <span>⛶</span>
+                <span id="fullscreenBtnLabel">전체화면</span>
+              </button>
+
+              <button id="backToSelectBtn" type="button" class="px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 border border-slate-600 text-slate-200 text-[10px] sm:text-[11px] font-bold cursor-pointer shrink-0">
+                ↩ 로비
+              </button>
+            </div>
+          </div>
 
           <!-- 3-2-1 카운트다운 -->
           <div id="countdownOverlay" class="pointer-events-none absolute inset-0 z-20 hidden items-center justify-center bg-black/50">
@@ -323,122 +414,130 @@
       </div>
 
       <!-- ============================================================== -->
-      <!-- PC & 모바일 통일 하단 조작 패널 (좌측 조이스틱/초상화 · 우측 상단 F·공격 · 우측 하단 Q·W·E·R) -->
+      <!-- 하단 조작 & 상점 패드 (일반 모드에서 절대 튀어나가지 않으며, 전체화면 시 하단 밀착) -->
       <!-- ============================================================== -->
-      <div class="bg-slate-900/95 border border-slate-800 rounded-2xl p-3 sm:p-3.5 shadow-xl flex flex-col gap-3">
-        <!-- 상단 컨트롤 영역 -->
-        <div class="flex items-center justify-between gap-3 sm:gap-4">
-          <!-- 좌측: 모바일은 가상 조이스틱 / PC는 챔피언 초상화 & 넥서스 회복 안내 -->
-          <div class="flex items-center gap-3 shrink-0">
-            <div id="touchJoystickZone" class="sm:hidden relative w-24 h-24 rounded-full bg-slate-950/95 border-2 border-sky-500/45 shadow-inner shrink-0 flex items-center justify-center touch-none">
-              <div class="absolute inset-2.5 rounded-full border border-dashed border-slate-700/80 pointer-events-none"></div>
-              <div id="touchJoystickKnob" class="w-10 h-10 rounded-full bg-gradient-to-b from-sky-400 to-blue-600 border-2 border-white/85 shadow-lg pointer-events-none flex items-center justify-center text-[10px] font-black text-white">✥</div>
-            </div>
+      <div id="bottomControlPanel" class="bg-slate-900/95 border border-slate-800 rounded-2xl p-2.5 sm:p-3 shadow-xl shrink-0 w-full overflow-hidden">
+        <!--
+          모바일 세로(기본): 1줄에 [좌측 조이스틱] + [우측 스킬창] 배치, 2줄에 [중앙 상태/상점 바] 배치 -> 가로 삐져나감 완벽 방지!
+          가로모드 / 태블릿 / PC / 전체화면: 1줄에 [좌측 조이스틱] + [중앙 상태/상점 바] + [우측 스킬창] 나란히 배치!
+        -->
+        <div id="padLayoutBox" class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-3 w-full">
 
-            <!-- PC 화면 좌측 영역 (모바일 조이스틱과 동일한 좌우 균형 배치) -->
-            <div class="hidden sm:flex items-center gap-3">
-              <div class="relative shrink-0">
-                <div id="hudPortrait" class="w-20 h-20 rounded-2xl bg-slate-950 border-2 border-sky-400/80 flex items-center justify-center text-3xl shadow-inner p-1">⚔️</div>
-                <span id="hudLevel" class="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center border-2 border-slate-900">1</span>
+          <!-- [1. 왼쪽] 조이스틱 (order-1) -->
+          <div class="order-1 flex items-center justify-center shrink-0">
+            <div id="touchJoystickZone" class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-slate-950 border-2 border-sky-500/55 shadow-[inset_0_0_14px_rgba(0,0,0,0.85)] shrink-0 flex items-center justify-center touch-none cursor-grab active:cursor-grabbing">
+              <div class="absolute inset-2 rounded-full border border-dashed border-sky-400/30 pointer-events-none"></div>
+              <div class="absolute inset-0 flex items-center justify-between px-1 text-[8px] font-bold text-slate-600 pointer-events-none"><span>◀</span><span>▶</span></div>
+              <div class="absolute inset-0 flex flex-col items-center justify-between py-1 text-[8px] font-bold text-slate-600 pointer-events-none"><span>▲</span><span>▼</span></div>
+              <div id="touchJoystickKnob" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-b from-sky-400 to-blue-600 border-2 border-white/90 shadow-lg shadow-sky-500/40 pointer-events-none flex items-center justify-center text-[11px] font-black text-white">✥</div>
+            </div>
+          </div>
+
+          <!-- [2. 중간] 캐릭터 정보 + 피통(HP)/마나(MP) + 골드 & 상점(B) (세로모드에선 아래쪽 100%, 가로/전체화면/PC에선 중앙 배치) -->
+          <div id="centerStatusBox" class="order-3 sm:order-2 w-full sm:w-auto sm:flex-1 sm:max-w-[280px] mx-auto flex flex-col gap-1 min-w-0">
+            <!-- 상단: 초상화 + 이름 + KDA + 골드 + 상점 버튼을 한 줄로 컴팩트하게 결합 -->
+            <div class="flex items-center justify-between gap-1.5 bg-slate-950/85 border border-slate-800/90 rounded-xl px-2 py-1">
+              <div class="flex items-center gap-1.5 min-w-0">
+                <div class="relative shrink-0">
+                  <div id="hudPortrait" class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-slate-900 border border-sky-400/75 flex items-center justify-center text-base overflow-hidden p-0.5">⚔️</div>
+                  <span id="hudLevel" class="absolute -bottom-1 -right-1 px-1 rounded bg-amber-400 text-slate-950 font-black text-[8px] leading-tight border border-slate-950">1</span>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-1">
+                    <span id="hudChampName" class="text-[11px] font-black text-sky-300 truncate">카렌</span>
+                    <span id="nexusHealBadge" class="hidden shrink-0 px-1 py-0.2 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[8px] font-black animate-pulse">✚회복</span>
+                  </div>
+                  <div class="text-[9px] text-slate-400 font-semibold truncate">
+                    <span id="hudRoleLabel" class="hidden md:inline">근접 전사 · </span><span id="hudKdaText" class="text-slate-300 tabular-nums">0/0 · CS 0</span>
+                  </div>
+                </div>
               </div>
-              <div class="flex flex-col gap-1">
-                <span class="text-xs font-black text-sky-300" id="hudRoleLabel">근접 전사</span>
-                <span class="text-[11px] text-slate-400">방향키(↑↓←→) 또는 클릭 이동</span>
-                <span class="text-[11px] text-emerald-400 font-bold">✚ 아군 넥서스 위 5초 초고속 전체회복</span>
+
+              <!-- 우측 골드 & 상점(B) 버튼 -->
+              <div class="flex items-center gap-1.5 shrink-0">
+                <div class="text-right">
+                  <div class="text-[11px] sm:text-xs font-black text-amber-300 leading-tight" id="hudGoldText">🪙 500 G</div>
+                  <div class="text-[8px] sm:text-[9px] text-slate-400 font-semibold" id="hudStatsText">공격 74 · 이속 225</div>
+                </div>
+                <button id="shopOpenBtn" type="button" class="shrink-0 px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-[10px] sm:text-[11px] shadow transition cursor-pointer flex items-center gap-1">
+                  <span>🛒</span>
+                  <span>상점</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 하단: 피통(HP) & 마나(MP) 바 -->
+            <div class="bg-slate-950/85 border border-slate-800/90 rounded-xl px-2 py-1 flex flex-col gap-1">
+              <div class="w-full h-2.5 sm:h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 relative">
+                <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
+                <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[8px] sm:text-[9px] font-black text-white drop-shadow">1280 / 1280</span>
+              </div>
+              <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
               </div>
             </div>
           </div>
 
-          <!-- 우측: 1줄 [F 점멸] [SPC 공격] (우측 정렬) / 2줄 [Q] [W] [E] [R] (우측 하단 일렬 배치) -->
-          <div class="flex-1 flex flex-col items-end gap-1.5 sm:gap-2 min-w-0">
-            <!-- 1줄: 점멸(F) + 공격(SPC) -->
-            <div class="flex items-center justify-end gap-1.5 sm:gap-2">
-              <button id="btnD" type="button" class="relative w-12 h-11 sm:w-16 sm:h-12 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-yellow-400/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-                <span class="text-sm sm:text-base">✨</span>
-                <span class="text-[9px] sm:text-[10px] font-extrabold text-yellow-200 leading-tight">점멸</span>
-                <span class="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-black text-amber-300">F</span>
-                <div id="cdD" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+          <!-- [3. 오른쪽] 오른손 엄지에 딱 맞게 가로 길이를 줄인 스킬 & 공격 버튼 영역 (order-2 sm:order-3) -->
+          <div id="rightSkillBox" class="order-2 sm:order-3 flex flex-col items-end gap-1.5 shrink-0">
+            <!-- 1줄: 점멸(F) + 공격(SPC) 아담하고 누르기 편한 폭 -->
+            <div class="grid grid-cols-2 gap-1.5 w-[204px] sm:w-[236px]">
+              <button id="btnD" type="button" class="skill-btn-top relative h-9 sm:h-10 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-yellow-400/80 flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer overflow-hidden shadow">
+                <span class="text-xs sm:text-sm">✨</span>
+                <span class="text-[10px] sm:text-[11px] font-black text-yellow-200">점멸</span>
+                <span class="absolute top-0.5 left-1.5 text-[8px] font-black text-amber-300">F</span>
+                <div id="cdD" class="hidden absolute inset-0 bg-black/80 items-center justify-center text-xs font-black text-white"></div>
               </button>
 
-              <button id="btnAtk" type="button" class="relative w-12 h-11 sm:w-16 sm:h-12 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-amber-400/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer">
-                <span class="text-sm sm:text-base">⚔️</span>
-                <span class="text-[9px] sm:text-[10px] font-black text-amber-300 leading-tight">공격</span>
-                <span class="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-bold text-slate-400">SPC</span>
-              </button>
-            </div>
-
-            <!-- 2줄: Q / W / E / R 스킬 4개 나란히 -->
-            <div class="grid grid-cols-4 gap-1.5 sm:gap-2 w-full max-w-[232px] sm:max-w-[304px]">
-              <button id="btnQ" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-                <span id="iconQ" class="text-base sm:text-lg">🌀</span>
-                <span id="nameQ" class="text-[9px] sm:text-[10px] font-extrabold text-sky-200 truncate max-w-[92%]">회전베기</span>
-                <span class="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-black text-amber-300">Q</span>
-                <div id="cdQ" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-              </button>
-
-              <button id="btnW" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-                <span id="iconW" class="text-base sm:text-lg">🛡️</span>
-                <span id="nameW" class="text-[9px] sm:text-[10px] font-extrabold text-sky-200 truncate max-w-[92%]">결의</span>
-                <span class="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-black text-amber-300">W</span>
-                <div id="cdW" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-              </button>
-
-              <button id="btnE" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/75 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-                <span id="iconE" class="text-base sm:text-lg">💨</span>
-                <span id="nameE" class="text-[9px] sm:text-[10px] font-extrabold text-sky-200 truncate max-w-[92%]">돌진</span>
-                <span class="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-black text-amber-300">E</span>
-                <div id="cdE" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
-              </button>
-
-              <button id="btnR" type="button" class="relative h-12 sm:h-14 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-fuchsia-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden">
-                <span id="iconR" class="text-base sm:text-lg">⚡</span>
-                <span id="nameR" class="text-[9px] sm:text-[10px] font-extrabold text-fuchsia-200 truncate max-w-[92%]">궁극기</span>
-                <span class="absolute top-0.5 left-1 text-[8px] sm:text-[9px] font-black text-amber-300">R</span>
-                <div id="cdR" class="hidden absolute inset-0 bg-black/75 items-center justify-center text-xs font-black text-white"></div>
+              <button id="btnAtk" type="button" class="skill-btn-top relative h-9 sm:h-10 rounded-xl bg-gradient-to-b from-amber-500/20 to-slate-950 hover:bg-slate-800 border-2 border-amber-400 flex items-center justify-center gap-1 transition active:scale-95 cursor-pointer shadow">
+                <span class="text-xs sm:text-sm">⚔️</span>
+                <span class="text-[10px] sm:text-[11px] font-black text-amber-300">공격</span>
+                <span class="absolute top-0.5 left-1.5 text-[8px] font-bold text-slate-400">SPC</span>
               </button>
             </div>
-          </div>
-        </div>
 
-        <!-- 중단: 챔피언 체력(HP) & 마나(MP) 상태 바 (PC & 모바일 동일) -->
-        <div class="bg-slate-950/75 border border-slate-800/90 rounded-xl px-3 py-2 flex flex-col gap-1">
-          <div class="flex items-center justify-between text-xs font-extrabold">
-            <div class="flex items-center gap-1.5 min-w-0">
-              <span id="hudLevelMobile" class="px-1.5 py-0.2 rounded bg-amber-400 text-slate-950 font-black text-[10px]">Lv.1</span>
-              <span id="hudChampName" class="text-sky-300 truncate">카렌 (칼든 기사)</span>
-              <span id="nexusHealBadge" class="hidden px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-[10px] font-black animate-pulse">✚ 넥서스 급속 회복중</span>
+            <!-- 2줄: Q / W / E / R 스킬 4개 (너무 길지 않게 엄지 동선 최적화: 204px / 236px) -->
+            <div class="grid grid-cols-4 gap-1.5 w-[204px] sm:w-[236px]">
+              <button id="btnQ" type="button" class="skill-btn-qwer relative h-12 sm:h-13 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden shadow">
+                <span id="iconQ" class="text-sm sm:text-base leading-none">🌀</span>
+                <span id="nameQ" class="text-[9px] sm:text-[10px] font-extrabold text-sky-200 truncate max-w-[92%] mt-0.5">회전베기</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">Q</span>
+                <div id="cdQ" class="hidden absolute inset-0 bg-black/80 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnW" type="button" class="skill-btn-qwer relative h-12 sm:h-13 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden shadow">
+                <span id="iconW" class="text-sm sm:text-base leading-none">🛡️</span>
+                <span id="nameW" class="text-[9px] sm:text-[10px] font-extrabold text-sky-200 truncate max-w-[92%] mt-0.5">결의</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">W</span>
+                <div id="cdW" class="hidden absolute inset-0 bg-black/80 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnE" type="button" class="skill-btn-qwer relative h-12 sm:h-13 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-sky-500/80 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden shadow">
+                <span id="iconE" class="text-sm sm:text-base leading-none">💨</span>
+                <span id="nameE" class="text-[9px] sm:text-[10px] font-extrabold text-sky-200 truncate max-w-[92%] mt-0.5">돌진</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">E</span>
+                <div id="cdE" class="hidden absolute inset-0 bg-black/80 items-center justify-center text-xs font-black text-white"></div>
+              </button>
+
+              <button id="btnR" type="button" class="skill-btn-qwer relative h-12 sm:h-13 rounded-xl bg-slate-950 hover:bg-slate-800 border-2 border-fuchsia-500/85 flex flex-col items-center justify-center transition active:scale-95 cursor-pointer overflow-hidden shadow">
+                <span id="iconR" class="text-sm sm:text-base leading-none">⚡</span>
+                <span id="nameR" class="text-[9px] sm:text-[10px] font-extrabold text-fuchsia-200 truncate max-w-[92%] mt-0.5">궁극기</span>
+                <span class="absolute top-0.5 left-1 text-[8px] font-black text-amber-300">R</span>
+                <div id="cdR" class="hidden absolute inset-0 bg-black/80 items-center justify-center text-xs font-black text-white"></div>
+              </button>
             </div>
-            <span id="hudKdaText" class="text-[11px] text-slate-300 tabular-nums shrink-0">0/0 · CS 0</span>
           </div>
-          <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800 relative">
-            <div id="hudHpBar" class="h-full bg-gradient-to-r from-emerald-500 to-green-400 transition-all duration-100" style="width:100%"></div>
-            <span id="hudHpText" class="absolute inset-0 flex items-center justify-center text-[9px] font-black text-white drop-shadow">1280 / 1280</span>
-          </div>
-          <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-            <div id="hudMpBar" class="h-full bg-gradient-to-r from-blue-600 to-sky-400 transition-all duration-100" style="width:100%"></div>
-          </div>
-        </div>
 
-        <!-- 하단: 좌측 골드/스탯 · 우측 상점(B) 버튼 (PC & 모바일 동일) -->
-        <div class="flex items-center justify-between gap-2 pt-0.5">
-          <div>
-            <div class="text-sm font-black text-amber-300" id="hudGoldText">🪙 500 G</div>
-            <div class="text-[11px] text-slate-400 font-semibold" id="hudStatsText">공격 74 · 이속 225</div>
-          </div>
-          <button id="shopOpenBtn" type="button" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black text-xs sm:text-sm shadow-lg transition cursor-pointer flex items-center gap-1.5">
-            <span>🛒</span>
-            <span>상점 (B)</span>
-          </button>
         </div>
       </div>
 
-      <div class="text-center text-[11px] text-slate-400">
-        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">좌측 조이스틱 / 화면 터치 이동</kbd> · 공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
+      <div id="controlGuideFooter" class="text-center text-[11px] text-slate-400">
+        조작: <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">좌측 조이스틱 / 방향키 / 화면 터치 이동</kbd> · 공격 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-amber-300">Space</kbd> · 스킬 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-sky-300">Q W E R</kbd> · 점멸 <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-yellow-300">F</kbd>
       </div>
     </section>
 
-    <!-- 바로가기 만들기 카드 -->
-    <section class="bg-gradient-to-br from-slate-900 to-sky-950/30 border border-sky-500/35 rounded-2xl p-3.5 shadow-xl shadow-black/40 mb-4">
+    <!-- 바로가기 만들기 카드 (전체화면 시 자동 숨김) -->
+    <section id="installSection" class="bg-gradient-to-br from-slate-900 to-sky-950/30 border border-sky-500/35 rounded-2xl p-3.5 shadow-xl shadow-black/40 mb-4">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-lg shrink-0">❄️</div>
@@ -538,6 +637,59 @@
 
   <script>
     (() => {
+      // ==========================================
+      // 0. 전체화면 (모바일 가로모드 & PC 대형 화면 집중 모드)
+      // ==========================================
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const fullscreenBtnLabel = document.getElementById('fullscreenBtnLabel');
+      let isFocusFullscreen = false;
+
+      function applyFocusFullscreen(active) {
+        isFocusFullscreen = active;
+        if (active) {
+          document.body.classList.add('focus-fullscreen');
+          fullscreenBtnLabel.textContent = '축소';
+        } else {
+          document.body.classList.remove('focus-fullscreen');
+          fullscreenBtnLabel.textContent = '전체화면';
+        }
+        setTimeout(resizeCanvas, 50);
+        setTimeout(resizeCanvas, 250);
+      }
+
+      fullscreenBtn.addEventListener('click', async () => {
+        if (!isFocusFullscreen) {
+          applyFocusFullscreen(true);
+          if (document.documentElement.requestFullscreen) {
+            try {
+              await document.documentElement.requestFullscreen();
+              if (screen.orientation && screen.orientation.lock) {
+                await screen.orientation.lock('landscape').catch(() => {});
+              }
+            } catch (e) {}
+          }
+          window.scrollTo(0, 0);
+        } else {
+          applyFocusFullscreen(false);
+          if (document.fullscreenElement && document.exitFullscreen) {
+            try {
+              if (screen.orientation && screen.orientation.unlock) {
+                screen.orientation.unlock();
+              }
+              await document.exitFullscreen();
+            } catch (e) {}
+          }
+        }
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement && isFocusFullscreen) {
+          applyFocusFullscreen(false);
+        } else {
+          setTimeout(resizeCanvas, 60);
+        }
+      });
+
       // ==========================================
       // 1. 챔피언 & 상점 아이템 & 서버/상태 정의
       // ==========================================
@@ -826,7 +978,6 @@
       const CLOUD_API_URL = 'https://02826k.duckdns.org';
       const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const API_BASE_URL = isLocalHost ? '' : CLOUD_API_URL;
-      const TOSS_CLIENT_KEY = 'test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm';
       const STORAGE_KEY = 'kalbaram_aram_save_v1';
       const TOKEN_KEY = 'gongdaegong_jwt_token';
       const USER_KEY = 'gongdaegong_username';
@@ -933,12 +1084,12 @@
           try {
             const now = audioCtx.currentTime;
             const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
+            const g = ctxA.createGain();
             osc.type = 'triangle';
             osc.frequency.setValueAtTime(notes[bgmStep % notes.length], now);
             g.gain.setValueAtTime(0.035, now);
             g.gain.exponentialRampToValueAtTime(0.0001, now + 0.34);
-            osc.connect(g); g.connect(audioCtx.destination);
+            osc.connect(g); g.connect(ctxA.destination);
             osc.start(now); osc.stop(now + 0.35);
             bgmStep++;
           } catch (e) {}
@@ -1186,7 +1337,7 @@
       }
 
       // ==========================================
-      // 5. 칼바람 나락 게임 엔진
+      // 5. 칼바람 나락 게임 엔진 (화면 꽉 차는 스케일 계산 적용)
       // ==========================================
       const WORLD_W = 1400;
       const WORLD_H = 560;
@@ -1199,11 +1350,21 @@
       let viewW = 900;
       let viewH = 450;
 
+      // 불필요한 상하단 검은 여백(560px) 대신 실제 다리 전장 높이(435px)를 기준으로 화면을 꽉 채우도록 계산!
+      function getViewportTransform() {
+        const activeW = 1350; // 실제 전장 좌우 폭 (25 ~ 1375)
+        const activeH = 435;  // 실제 다리 전장 상하 폭
+        const scale = Math.min(viewW / activeW, viewH / activeH);
+        const ox = (viewW - WORLD_W * scale) / 2;
+        const oy = (viewH - WORLD_H * scale) / 2;
+        return { scale, ox, oy };
+      }
+
       function resizeCanvas() {
         const rect = canvasWrapper.getBoundingClientRect();
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        viewW = Math.max(320, rect.width || 900);
-        viewH = Math.max(220, rect.height || 450);
+        viewW = Math.max(280, rect.width || 900);
+        viewH = Math.max(160, rect.height || 450);
         canvas.width = Math.floor(viewW * dpr);
         canvas.height = Math.floor(viewH * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1314,7 +1475,7 @@
 
       function spawnMinionWave() {
         waveCount++;
-        document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount} (미니언 4 + 대장 1)`;
+        document.getElementById('hudWaveInfo').textContent = `웨이브 ${waveCount}`;
 
         ['blue', 'red'].forEach(team => {
           const nx = team === 'blue' ? 105 : WORLD_W - 105;
@@ -1393,8 +1554,9 @@
           else hpEl.textContent = c.icon;
         }
         const roleEl = document.getElementById('hudRoleLabel');
-        if (roleEl) roleEl.textContent = `${c.name} · ${c.role}`;
+        if (roleEl) roleEl.textContent = `${c.role} · `;
         document.getElementById('hudChampName').textContent = `${c.name} (${c.title})`;
+
         ['Q', 'W', 'E', 'R'].forEach(k => {
           document.getElementById('icon' + k).textContent = c.skills[k].icon;
           document.getElementById('name' + k).textContent = c.skills[k].name;
@@ -1792,7 +1954,6 @@
         if (h.combatTimer > 0) h.combatTimer -= dt;
         if (h.revealTimer > 0) h.revealTimer = Math.max(0, h.revealTimer - dt);
 
-        // 마나/체력 재생 & 넥서스 우물 초고속 회복 (5초 만에 100% 전체 회복)
         h.mp = Math.min(h.maxMp, h.mp + 14 * dt);
         h.gold += (state.isVip && h === myHero ? 6 : 3) * dt;
         const ownNexus = structures.find(s => s.type === 'nexus' && s.team === h.team && s.hp > 0);
@@ -1800,7 +1961,6 @@
         h.onNexusWell = Boolean(onNexus && h.hp < h.maxHp);
 
         if (onNexus) {
-          // 초당 최대 체력의 20% 회복 -> 5초면 0%에서 100% 전체 회복
           h.hp = Math.min(h.maxHp, h.hp + (h.maxHp * 0.20) * dt);
           h.mp = Math.min(h.maxMp, h.mp + (h.maxMp * 0.25) * dt);
         } else if (h.combatTimer <= 0 && (h.champId === 'karen' || h.warmogRegen)) {
@@ -1850,19 +2010,6 @@
         h.y = Math.max(LANE_TOP + 10, Math.min(LANE_BOT - 10, h.y));
 
         h.inBush = bushes.some(b => h.x >= b.x && h.x <= b.x + b.w && h.y >= b.y && h.y <= b.y + b.h);
-
-        if (h.portalCd <= 0) {
-          const ownPortal = portals.find(p => p.team === h.team && Math.hypot(p.x - h.x, p.y - h.y) < p.radius + 10);
-          if (ownPortal) {
-            h.portalCd = 14;
-            vfxList.push({ type: 'ring', x: h.x, y: h.y, r: 8, maxR: 48, color: '#38bdf8', life: 0.4 });
-            h.x = ownPortal.destX;
-            h.y = ownPortal.destY;
-            h.targetX = null; h.targetY = null;
-            vfxList.push({ type: 'ring', x: h.x, y: h.y, r: 8, maxR: 48, color: '#38bdf8', life: 0.4 });
-            if (h === myHero) showToast('🌀 마법공학 차원문 이동!');
-          }
-        }
       }
 
       function updateMinionsAndStructures(dt) {
@@ -1982,7 +2129,7 @@
         abyssGrad.addColorStop(0.5, '#0c192c');
         abyssGrad.addColorStop(1, '#020617');
         ctx.fillStyle = abyssGrad;
-        ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+        ctx.fillRect(-400, -400, WORLD_W + 800, WORLD_H + 800);
 
         const bridgeGrad = ctx.createLinearGradient(0, LANE_TOP, 0, LANE_BOT);
         bridgeGrad.addColorStop(0, '#1e293b');
@@ -2023,22 +2170,6 @@
           ctx.fillText('🌿 은신 부시', b.x + b.w / 2, b.y + b.h / 2 + 4);
         });
 
-        portals.forEach(p => {
-          const pSp = worldSprites[`portal_${p.team}`];
-          const sz = p.radius * 2.5;
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(matchTime * (p.team === 'blue' ? 0.9 : -0.9));
-          if (pSp && pSp.ready) {
-            ctx.drawImage(pSp.img, -sz / 2, -sz / 2, sz, sz);
-          } else {
-            ctx.strokeStyle = p.team === 'blue' ? '#38bdf8' : '#fb7185';
-            ctx.lineWidth = 3;
-            ctx.beginPath(); ctx.arc(0, 0, p.radius, 0, Math.PI * 2); ctx.stroke();
-          }
-          ctx.restore();
-        });
-
         relics.forEach(r => {
           if (!r.active) {
             ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
@@ -2071,7 +2202,6 @@
             ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.arc(s.x, s.y, s.range, 0, Math.PI * 2); ctx.stroke();
           } else if (s.type === 'nexus') {
-            // 넥서스 회복 우물 영역 표시 (점선 오오라 링)
             ctx.save();
             ctx.strokeStyle = s.team === 'blue' ? 'rgba(52, 211, 153, 0.45)' : 'rgba(251, 113, 133, 0.45)';
             ctx.lineWidth = 2;
@@ -2099,11 +2229,6 @@
             ctx.beginPath();
             ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
             ctx.fill(); ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 14px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('🗼', s.x, s.y + 6);
           }
           ctx.restore();
 
@@ -2271,24 +2396,23 @@
 
         const bNex = structures.find(s => s.id === 'blue_nexus');
         const rNex = structures.find(s => s.id === 'red_nexus');
-        if (bNex) document.getElementById('hudBlueNexus').textContent = `블루 넥서스 ${Math.round(bNex.hp)}`;
-        if (rNex) document.getElementById('hudRedNexus').textContent = `레드 넥서스 ${Math.round(rNex.hp)}`;
+        if (bNex) document.getElementById('hudBlueNexus').textContent = `블루 ${Math.round(bNex.hp)}`;
+        if (rNex) document.getElementById('hudRedNexus').textContent = `레드 ${Math.round(rNex.hp)}`;
 
         const lvEl = document.getElementById('hudLevel');
         if (lvEl) lvEl.textContent = myHero.level;
-        const lvMobEl = document.getElementById('hudLevelMobile');
-        if (lvMobEl) lvMobEl.textContent = `Lv.${myHero.level}`;
 
-        const healBadge = document.getElementById('nexusHealBadge');
-        if (healBadge) {
-          if (myHero.onNexusWell) healBadge.classList.remove('hidden');
-          else healBadge.classList.add('hidden');
+        const healEl = document.getElementById('nexusHealBadge');
+        if (healEl) {
+          if (myHero.onNexusWell) healEl.classList.remove('hidden');
+          else healEl.classList.add('hidden');
         }
 
         document.getElementById('hudKdaText').textContent = `${myHero.kills}/${myHero.deaths} · CS ${myHero.cs}`;
         document.getElementById('hudHpBar').style.width = `${Math.max(0, (myHero.hp / myHero.maxHp) * 100)}%`;
         document.getElementById('hudHpText').textContent = `${Math.round(myHero.hp)} / ${myHero.maxHp}`;
         document.getElementById('hudMpBar').style.width = `${Math.max(0, (myHero.mp / myHero.maxMp) * 100)}%`;
+
         document.getElementById('hudGoldText').textContent = `🪙 ${Math.floor(myHero.gold)} G`;
         document.getElementById('hudStatsText').textContent = `공격 ${myHero.ad} · 이속 ${Math.round(myHero.speed)}`;
 
@@ -2344,9 +2468,7 @@
         }
 
         ctx.clearRect(0, 0, viewW, viewH);
-        const scale = Math.min(viewW / WORLD_W, viewH / WORLD_H);
-        const ox = (viewW - WORLD_W * scale) / 2;
-        const oy = (viewH - WORLD_H * scale) / 2;
+        const { scale, ox, oy } = getViewportTransform();
         ctx.save();
         ctx.translate(ox, oy);
         ctx.scale(scale, scale);
@@ -2362,9 +2484,7 @@
       // ==========================================
       function screenToWorld(clientX, clientY) {
         const rect = canvas.getBoundingClientRect();
-        const scale = Math.min(viewW / WORLD_W, viewH / WORLD_H);
-        const ox = (viewW - WORLD_W * scale) / 2;
-        const oy = (viewH - WORLD_H * scale) / 2;
+        const { scale, ox, oy } = getViewportTransform();
         return {
           x: (clientX - rect.left - ox) / scale,
           y: (clientY - rect.top - oy) / scale
@@ -2384,7 +2504,6 @@
         mouseWorld = screenToWorld(e.clientX, e.clientY);
       });
 
-      // 모바일 터치 가상 조이스틱
       const joyZone = document.getElementById('touchJoystickZone');
       const joyKnob = document.getElementById('touchJoystickKnob');
       let joyActive = false;
@@ -2512,12 +2631,21 @@
       document.getElementById('shopOpenBtn').addEventListener('click', toggleShop);
       document.getElementById('shopCloseBtn').addEventListener('click', toggleShop);
 
-      // 모드 전환 & 대기실 버튼
+      function exitFullscreenIfActive() {
+        if (isFocusFullscreen) {
+          applyFocusFullscreen(false);
+          if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          }
+        }
+      }
+
       function switchToPracticeSelect() {
+        exitFullscreenIfActive();
         gameRunning = false;
         currentMode = 'practice';
-        document.getElementById('modePracticeTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-sky-600 text-white shadow cursor-pointer';
-        document.getElementById('modePvPTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
+        document.getElementById('modePracticeTab').className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-sky-600 text-white shadow cursor-pointer';
+        document.getElementById('modePvPTab').className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
         document.getElementById('gameAreaSection').classList.add('hidden');
         document.getElementById('pvpLobbySection').classList.add('hidden');
         document.getElementById('pvpLobbySection').classList.remove('flex');
@@ -2525,10 +2653,11 @@
       }
 
       function switchToPvpLobby() {
+        exitFullscreenIfActive();
         gameRunning = false;
         currentMode = 'pvp';
-        document.getElementById('modePracticeTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
-        document.getElementById('modePvPTab').className = 'px-3.5 py-1.5 rounded-xl text-xs font-extrabold bg-blue-600 text-white shadow cursor-pointer';
+        document.getElementById('modePracticeTab').className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-slate-800 text-slate-300 cursor-pointer';
+        document.getElementById('modePvPTab').className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-blue-600 text-white shadow cursor-pointer';
         document.getElementById('gameAreaSection').classList.add('hidden');
         document.getElementById('practiceSelectSection').classList.add('hidden');
         document.getElementById('pvpLobbySection').classList.remove('hidden');
